@@ -1,0 +1,17 @@
+{
+  "name": "d3-timeline",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.2",
+    "vite": "^2.6.4"
+  },
+  "dependencies": {
+    "@types/d3": "^7.1.0",
+    "d3": "^7.1.1"
+  }
+}

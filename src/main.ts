@@ -11,6 +11,7 @@ type ProcessedSpanEvent = Omit<
   end: Date;
   weight: number;
   y: number;
+  height: number;
 };
 
 type ProcessedPointEvent = Omit<PointEvent, "date"> & {
@@ -25,7 +26,10 @@ const TOPIC_COLORS = {
 
 function processEvents(
   events: (SpanEvent | PointEvent)[]
-): (Omit<ProcessedSpanEvent, "y"> | ProcessedPointEvent)[] {
+): (
+  | Omit<ProcessedSpanEvent, "y" | "height">
+  | ProcessedPointEvent
+)[] {
   return events.map((e) => {
     if ("date" in e) {
       return {
@@ -43,8 +47,9 @@ function processEvents(
 }
 
 function processSpanEvents(
-  events: Omit<ProcessedSpanEvent, "y">[]
-) {
+  events: Omit<ProcessedSpanEvent, "y" | "height">[],
+  referenceHeight: number
+): ProcessedSpanEvent[] {
   const eventsSortedByWeight = events.sort(
     (a, b) => b.weight - a.weight
   );
@@ -73,12 +78,12 @@ function processSpanEvents(
       }
       acc.push({ ...cur, y });
       return acc;
-    }, [] as ProcessedSpanEvent[])
+    }, [] as Omit<ProcessedSpanEvent, "height">[])
     .map((event) => ({
       ...event,
-      y: undefined,
-      yPercent: event.y / totalHeight,
-      heightPercent: event.weight / totalHeight,
+      y: (event.y / totalHeight) * referenceHeight,
+      height:
+        (event.weight / totalHeight) * referenceHeight,
     }));
 }
 
@@ -104,6 +109,7 @@ function getDomainWithPadding(
 
 const axisHeight = 100;
 const spanEventsTotalHeight = 400;
+const selectedSpanEventHeight = 700;
 const width = 1000;
 const height = 800;
 
@@ -121,11 +127,14 @@ function createTimeline(
       return acc;
     },
     [[], []] as [
-      Omit<ProcessedSpanEvent, "y">[],
+      Omit<ProcessedSpanEvent, "y" | "height">[],
       ProcessedPointEvent[]
     ]
   );
-  const processedSpanEvents = processSpanEvents(spanEvents);
+  const processedSpanEvents = processSpanEvents(
+    spanEvents,
+    spanEventsTotalHeight
+  );
   const allDates = processedEvents.reduce((acc, cur) => {
     if ("date" in cur) {
       acc.push(cur.date);
@@ -150,13 +159,6 @@ function createTimeline(
   const svg = d3
     .create("svg")
     .attr("viewBox", `0 0 ${width} ${height}`);
-
-  const axis = d3.axisTop(scaleX).tickSize(80);
-  const axisGroup = svg
-    .append("g")
-    .call(axis)
-    .attr("transform", `translate(0, ${axisHeight})`)
-    .attr("stroke-width", 2);
 
   svg
     .selectAll(".spanEvent")
@@ -185,16 +187,11 @@ function createTimeline(
       return eventElement.node();
     })
     .attr("x", (d) => scaleX(d.start))
-    .attr(
-      "y",
-      (d) => d.yPercent * spanEventsTotalHeight + axisHeight
-    )
+    .attr("y", (d) => d.y + axisHeight)
     .attr("width", (d) => scaleX(d.end) - scaleX(d.start))
-    .attr(
-      "height",
-      (d) => d.heightPercent * spanEventsTotalHeight
-    )
+    .attr("height", (d) => d.height)
     .on("click", function (_, event) {
+      console.log(event);
       const eventDomain = getDomainWithPadding(
         event.start,
         event.end,
@@ -224,13 +221,38 @@ function createTimeline(
         .duration(1000)
         .ease(d3.easePolyInOut)
         .attr("x", (d) => scaleX(d.start))
-        .attr("y", 0)
+        .attr("y", (d) => {
+          return (
+            axisHeight +
+            (d.y - event.y) *
+              (selectedSpanEventHeight / event.height)
+          );
+        })
         .attr(
           "width",
           (d) => scaleX(d.end) - scaleX(d.start)
         )
-        .attr("height", height);
+        .attr(
+          "height",
+          (d) =>
+            d.height *
+            (selectedSpanEventHeight / event.height)
+        );
     });
+
+  const axis = d3.axisTop(scaleX).tickSize(80);
+  svg
+    .append("rect")
+    .attr("width", "100%")
+    .attr("height", axisHeight)
+    .attr("fill", "#fff");
+
+  const axisGroup = svg
+    .append("g")
+    .call(axis)
+    .attr("transform", `translate(0, ${axisHeight})`)
+    .attr("fill", "#fff")
+    .attr("stroke-width", 2);
 
   svg
     .selectAll(".pointEvent")

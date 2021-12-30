@@ -1,5 +1,6 @@
 import "./style.css";
 import * as d3 from "d3";
+import markdownIt from "markdown-it";
 import mockData, { PointEvent, SpanEvent } from "./data";
 import { getMinMaxDates } from "./utils";
 
@@ -23,6 +24,7 @@ const TOPIC_COLORS = {
   Ort: "#38b000",
   Produktion: "#3a86ff",
 };
+const md = markdownIt();
 
 function processEvents(
   events: (SpanEvent | PointEvent)[]
@@ -109,13 +111,14 @@ function getDomainWithPadding(
 
 const axisHeight = 100;
 const spanEventsTotalHeight = 400;
-const selectedSpanEventHeight = 700;
+const selectedSpanEventHeight = 600;
 const width = 1000;
 const height = 800;
 
 function createTimeline(
   events: (SpanEvent | PointEvent)[]
 ) {
+  let selectedSpanEvent: ProcessedSpanEvent;
   const processedEvents = processEvents(events);
   const [spanEvents, pointEvents] = processedEvents.reduce(
     (acc, cur) => {
@@ -195,31 +198,33 @@ function createTimeline(
       const eventDomain = getDomainWithPadding(
         event.start,
         event.end,
-        0.1
+        0.5
       );
 
       scaleX.domain(eventDomain);
 
-      axisGroup
+      const transition: any = d3
         .transition()
         .duration(1000)
-        .ease(d3.easePolyInOut)
+        .ease(d3.easePolyInOut);
+
+      axisGroup
+        .transition(transition)
         .call(d3.axisTop(scaleX).tickSize(80));
 
       d3.selectAll<SVGCircleElement, ProcessedPointEvent>(
         ".pointEvent"
       )
-        .transition()
-        .duration(1000)
-        .ease(d3.easePolyInOut)
+        .transition(transition)
         .attr("cx", (d) => scaleX(d.date));
 
-      d3.selectAll<SVGElement, ProcessedSpanEvent>(
-        ".spanEvent"
-      )
-        .transition()
-        .duration(1000)
-        .ease(d3.easePolyInOut)
+      const spanEvents = d3.selectAll<
+        SVGElement,
+        ProcessedSpanEvent
+      >(".spanEvent");
+
+      spanEvents
+        .transition(transition)
         .attr("x", (d) => scaleX(d.start))
         .attr("y", (d) => {
           return (
@@ -238,6 +243,21 @@ function createTimeline(
             d.height *
             (selectedSpanEventHeight / event.height)
         );
+
+      d3.select(this)
+        .select("image")
+        .transition(transition)
+        .attr("height", "50%");
+
+      if (selectedSpanEvent) {
+        spanEvents
+          .filter((d) => d === selectedSpanEvent)
+          .select("image")
+          .transition(transition)
+          .attr("height", "100%");
+      }
+
+      selectedSpanEvent = event;
     });
 
   const axis = d3.axisTop(scaleX).tickSize(80);

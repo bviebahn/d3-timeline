@@ -7,11 +7,13 @@
     "serve": "vite preview"
   },
   "devDependencies": {
+    "@types/markdown-it": "^12.2.3",
     "typescript": "^4.3.2",
     "vite": "^2.6.4"
   },
   "dependencies": {
     "@types/d3": "^7.1.0",
-    "d3": "^7.1.1"
+    "d3": "^7.1.1",
+    "markdown-it": "^12.3.0"
   }
 }

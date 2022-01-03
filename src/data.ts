@@ -1147,24 +1147,24 @@ const htwData: (SpanEvent | PointEvent)[] = [
     image:
       "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705333/02-02b_gebaeude-A4-nach-januar-1944-02_pbgpfp.jpg",
   },
-  {
-    id: "23",
-    start: "1946",
-    end: "1954",
-    title: "SAG-VEB-Kombinat",
-    text: "1946 werden von der Sowjetischen Militäradministration sogenannte Sowjetische Aktiengesellschaften (SAG) gegründet. Diese unter Kontrolle der UdSSR stehenden Unternehmen dienen dem Reparationsausgleich für erlittene Kriegsschäden. 1954 enden die Reparationszahlungen. Die Unternehmen werden verstaatlicht und in Volkseigene Betriebe (VEB) verwandelt. Damit überführt die 1949 gegründete DDR die Produktionsmittel aus privater Hand in den Besitz des Volkes. Über den Zusammenschluss von Volkseigenen Betrieben mit ähnlichem Produktionsprofil entstehen Kombinate. Dadurch soll der Wettbewerb egalisiert und das Potenzial für Forschung und Entwicklung genutzt werden.",
-    image:
-      "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705333/02-02b_gebaeude-A4-nach-januar-1944-02_pbgpfp.jpg",
-  },
-  {
-    id: "24",
-    start: "1958",
-    end: "1961",
-    title: "VEB KWO",
-    text: "Auch wenn von Spreehalle und Hallenblock II nur noch die Umfassungsmauern stehen, können die übrigen, weitgehend erhaltenen Werkshallen rasch wieder genutzt werden. 1958 bis 1961 wird die neue Spreehalle West* im Stil der sachlich-funktionalen Industriemoderne errichtet.",
-    image:
-      "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705333/02-02b_gebaeude-A4-nach-januar-1944-02_pbgpfp.jpg",
-  },
+  // {
+  //   id: "23",
+  //   start: "1946",
+  //   end: "1954",
+  //   title: "SAG-VEB-Kombinat",
+  //   text: "1946 werden von der Sowjetischen Militäradministration sogenannte Sowjetische Aktiengesellschaften (SAG) gegründet. Diese unter Kontrolle der UdSSR stehenden Unternehmen dienen dem Reparationsausgleich für erlittene Kriegsschäden. 1954 enden die Reparationszahlungen. Die Unternehmen werden verstaatlicht und in Volkseigene Betriebe (VEB) verwandelt. Damit überführt die 1949 gegründete DDR die Produktionsmittel aus privater Hand in den Besitz des Volkes. Über den Zusammenschluss von Volkseigenen Betrieben mit ähnlichem Produktionsprofil entstehen Kombinate. Dadurch soll der Wettbewerb egalisiert und das Potenzial für Forschung und Entwicklung genutzt werden.",
+  //   image:
+  //     "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705333/02-02b_gebaeude-A4-nach-januar-1944-02_pbgpfp.jpg",
+  // },
+  // {
+  //   id: "24",
+  //   start: "1958",
+  //   end: "1961",
+  //   title: "VEB KWO",
+  //   text: "Auch wenn von Spreehalle und Hallenblock II nur noch die Umfassungsmauern stehen, können die übrigen, weitgehend erhaltenen Werkshallen rasch wieder genutzt werden. 1958 bis 1961 wird die neue Spreehalle West* im Stil der sachlich-funktionalen Industriemoderne errichtet.",
+  //   image:
+  //     "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705333/02-02b_gebaeude-A4-nach-januar-1944-02_pbgpfp.jpg",
+  // },
   {
     id: "25",
     date: "1958",
@@ -1198,7 +1198,7 @@ const htwData: (SpanEvent | PointEvent)[] = [
     topic: "Ort",
     title:
       "Beginn der Bauarbeiten am Campus Wilhelminenhof",
-    text: "Nachdem alle Versuche fehlschlagen, auf dem KWO-Gelände neues Gewerbe anzusiedeln, fällt 2004 die Entscheidung, das Areal in einen Hochschulcampus umzuwandeln. 2005 beginnen die Bauarbeiten. Aufgrund der starken Umweltbelastungen in Boden und Mauerwerk wird die 1928 nach dem Entwurf von Ernst Ziesel errichtete Fernmeldekabelfabrik, einer der bedeutendsten Industriebauten der Moderne, abgerissen – angesichts des anerkannten Denkmalwerts eine höchst umstrittene Entscheidung. An den „Ziesel-Bau“ erinnern heute zwei Neubauten. Sämtliche Altbauten des Campus Wilhelminenhof stehen unter Denkmalschutz und tragen noch die Spuren ihrer einstigen Nutzung; die Straßen auf dem Gelände sind nach den Architekten der AEG-Fabrikhallen benannt.",
+    text: "Nachdem alle Versuche fehlschlagen, auf dem KWO-Gelände neues Gewerbe anzusiedeln, fällt 2004 die Entscheidung, das Areal in einen Hochschulcampus umzuwandeln. 2005 beginnen die Bauarbeiten. Aufgrund der starken Umweltbelastungen in Boden und Mauerwerk wird die 1928 nach dem Entwurf von Ernst Ziesel errichtete Fernmeldekabelfabrik, einer der bedeutendsten Industriebauten der Moderne, abgerissen - angesichts des anerkannten Denkmalwerts eine höchst umstrittene Entscheidung. An den „Ziesel-Bau“ erinnern heute zwei Neubauten. Sämtliche Altbauten des Campus Wilhelminenhof stehen unter Denkmalschutz und tragen noch die Spuren ihrer einstigen Nutzung; die Straßen auf dem Gelände sind nach den Architekten der AEG-Fabrikhallen benannt.",
     image:
       "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1639065491/seit-1990-ort-tor-4-01-1920x_l2apwg.jpg",
   },

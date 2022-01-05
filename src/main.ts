@@ -88,13 +88,14 @@ function createPointEventElement(
   const headerHeight = 30;
 
   const titleLines = splitText(event.title, 40);
-  const textLines = splitText(event.text, 56);
+  const textLines = splitText(event.text, 52);
 
   const height =
     headerHeight +
     imageHeight +
     titleLines.length * 20 +
-    textLines.length * 16 + 30;
+    textLines.length * 16 +
+    30;
 
   const eventElement = d3
     .create("svg")
@@ -138,7 +139,6 @@ function createPointEventElement(
     .attr("y", 20)
     .text(event.topic)
     .attr("fill", "#222")
-    .style("font-family", "monospace")
     .attr("font-size", 16);
 
   clipGroup
@@ -159,7 +159,6 @@ function createPointEventElement(
     .text((d) => d)
     .attr("fill", "#ccc")
     .style("font-size", 16)
-    .style("font-family", "monospace")
     .style("font-weight", "bold");
 
   clipGroup
@@ -174,8 +173,7 @@ function createPointEventElement(
     )
     .text((d) => d)
     .attr("fill", "#ccc")
-    .style("font-size", 12)
-    .style("font-family", "monospace");
+    .style("font-size", 12);
 
   return eventElement.node();
 }
@@ -293,13 +291,12 @@ function createTimeline(
 
       contentElement
         .selectAll(".spanEventText")
-        .data(splitText(event.text, 72))
+        .data(splitText(event.text, 65))
         .enter()
         .append("text")
         .text((d) => d)
         .attr("x", 10)
         .attr("y", (_, i) => 40 + i * 16)
-        .style("font-family", "monospace")
         .style("font-size", 12)
         .attr("fill", "#ccc");
 

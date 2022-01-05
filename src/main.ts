@@ -80,12 +80,14 @@ function splitText(text: string, maxLineLength: number) {
 }
 
 function createPointEventElement(
-  event: ProcessedPointEvent
+  event: ProcessedPointEvent,
+  alignInfoBox: "left" | "right"
 ) {
   const width = 400;
   const maxHeight = 600;
-  const imageHeight = 200;
+  const imageHeight = width / (16 / 9);
   const headerHeight = 30;
+  const backgroundColor = "#111";
 
   const titleLines = splitText(event.title, 40);
   const textLines = splitText(event.text, 52);
@@ -112,7 +114,12 @@ function createPointEventElement(
     .append("svg:clipPath")
     .attr("id", clipPathId)
     .append("svg:circle")
-    .attr("cx", pointEventRadius)
+    .attr(
+      "cx",
+      alignInfoBox === "left"
+        ? pointEventRadius
+        : width - pointEventRadius
+    )
     .attr("cy", pointEventRadius)
     .attr("r", pointEventRadius);
 
@@ -131,14 +138,14 @@ function createPointEventElement(
     .attr("y", headerHeight - 1)
     .attr("width", width)
     .attr("height", "100%")
-    .attr("fill", "#222");
+    .attr("fill", backgroundColor);
 
   clipGroup
     .append("text")
     .attr("x", width / 2 - event.topic.length * 4)
     .attr("y", 20)
     .text(event.topic)
-    .attr("fill", "#222")
+    .attr("fill", backgroundColor)
     .attr("font-size", 16);
 
   clipGroup
@@ -147,7 +154,8 @@ function createPointEventElement(
     .attr("width", width)
     .attr("height", imageHeight)
     .attr("preserveAspectRatio", "xMidYMid slice")
-    .attr("href", event.image);
+    .attr("href", event.image)
+    .style("cursor", "pointer");
 
   clipGroup
     .selectAll(".titleLine")
@@ -155,7 +163,7 @@ function createPointEventElement(
     .enter()
     .append("text")
     .attr("x", 10)
-    .attr("y", (_, i) => 250 + i * 20)
+    .attr("y", (_, i) => imageHeight + 50 + i * 20)
     .text((d) => d)
     .attr("fill", "#ccc")
     .style("font-size", 16)
@@ -169,7 +177,8 @@ function createPointEventElement(
     .attr("x", 10)
     .attr(
       "y",
-      (_, i) => 255 + titleLines.length * 20 + i * 16
+      (_, i) =>
+        imageHeight + 50 + titleLines.length * 20 + i * 16
     )
     .text((d) => d)
     .attr("fill", "#ccc")
@@ -324,6 +333,9 @@ function createTimeline(
         event.end,
         0.5
       );
+      const eventDomainMid =
+        +eventDomain[0] +
+        (+eventDomain[1] - +eventDomain[0]) / 2;
 
       scaleX.domain(eventDomain);
 
@@ -342,8 +354,17 @@ function createTimeline(
         .transition(transition)
         .attr(
           "x",
-          (d) => scaleX(d.date) - pointEventRadius
-        );
+          (d) =>
+            scaleX(d.date) -
+            pointEventRadius -
+            (+d.date > eventDomainMid ? 400 : 0)
+        )
+        .select("clipPath circle")
+        .attr("cx", (d) => {
+          return +d.date > eventDomainMid
+            ? 400 - pointEventRadius
+            : pointEventRadius;
+        });
 
       const spanEvents = d3.selectAll<
         SVGElement,
@@ -413,17 +434,31 @@ function createTimeline(
     .attr("transform", `translate(0, ${axisHeight})`)
     .attr("fill", "#fff")
     .attr("stroke-width", 2);
+  const domainMid =
+    +domain[0] + (+domain[1] - +domain[0]) / 2;
 
   svg
     .selectAll(".pointEvent")
     .data(pointEvents)
     .enter()
-    .append(createPointEventElement)
-    .attr("x", (d) => scaleX(d.date) - pointEventRadius)
+    .append((d) =>
+      createPointEventElement(
+        d,
+        +d.date > domainMid ? "right" : "left"
+      )
+    )
+    .attr(
+      "x",
+      (d) =>
+        scaleX(d.date) -
+        pointEventRadius -
+        (+d.date > domainMid ? 400 : 0)
+    )
     .on("mouseover", function (_, d) {
       d3.selectAll(".pointEvent").sort((a, _) =>
         a === d ? 1 : -1
       );
+
       d3.select(`#circleClipPath_${d.id} circle`)
         .transition()
         .duration(500)

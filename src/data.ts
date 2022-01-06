@@ -1,3 +1,5 @@
+import { PointEvent, SpanEvent } from "./types";
+
 const data = [
   {
     id: "0x8b0AeC8b25E9f78a1b3Fad00aF1370E1",
@@ -926,23 +928,7 @@ const data = [
   },
 ];
 
-export type BaseEvent = {
-  id: string;
-  title: string;
-  text: string;
-  image: string;
-};
 
-export type SpanEvent = BaseEvent & {
-  start: string;
-  end: string | undefined;
-  weight?: number;
-};
-
-export type PointEvent = BaseEvent & {
-  date: string;
-  topic: "Ort" | "Produktion" | "Menschen";
-};
 
 const htwData: (SpanEvent | PointEvent)[] = [
   {

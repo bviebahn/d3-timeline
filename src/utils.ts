@@ -15,3 +15,36 @@ export function getMinMaxDates(
     [firstDate, firstDate]
   );
 }
+
+export function getDomainWithPadding(
+  start: Date,
+  end: Date,
+  padding: number
+) {
+  const timeSpan = +end - +start;
+  return [
+    new Date(+start - timeSpan * padding),
+    new Date(+end + timeSpan * padding),
+  ];
+}
+
+export function splitText(
+  text: string,
+  maxLineLength: number
+) {
+  const words = text.split(" ");
+  return words.reduce(
+    (acc, cur) => {
+      const lastLine = acc[acc.length - 1];
+      if (lastLine.length + cur.length <= maxLineLength) {
+        acc[acc.length - 1] = `${
+          acc[acc.length - 1]
+        } ${cur}`;
+      } else {
+        acc.push(cur);
+      }
+      return acc;
+    },
+    [""]
+  );
+}

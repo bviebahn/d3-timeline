@@ -1,27 +1,19 @@
 import "./style.css";
 import * as d3 from "d3";
-import markdownIt from "markdown-it";
-import mockData, { PointEvent, SpanEvent } from "./data";
-import { getMinMaxDates } from "./utils";
-
-type ProcessedSpanEvent = Omit<
+import mockData from "./data";
+import {
+  getDomainWithPadding,
+  getMinMaxDates,
+  splitText,
+} from "./utils";
+import {
+  PointEvent,
+  ProcessedPointEvent,
+  ProcessedSpanEvent,
   SpanEvent,
-  "start" | "end"
-> & {
-  start: Date;
-  end: Date;
-};
-
-type ProcessedPointEvent = Omit<PointEvent, "date"> & {
-  date: Date;
-};
-
-const TOPIC_COLORS = {
-  Menschen: "#f94144",
-  Ort: "#38b000",
-  Produktion: "#3a86ff",
-};
-const md = markdownIt();
+} from "./types";
+import pointEventElement from "./elements/pointEventElement";
+import spanEventElement from "./elements/spanEventElement";
 
 function processEvents(
   events: (SpanEvent | PointEvent)[]
@@ -39,152 +31,6 @@ function processEvents(
       end: e.end ? new Date(e.end) : new Date(),
     };
   });
-}
-
-function getPointEventY(topic: string) {
-  return topic === "Menschen"
-    ? 40
-    : topic === "Ort"
-    ? 60
-    : 80;
-}
-
-function getDomainWithPadding(
-  start: Date,
-  end: Date,
-  padding: number
-) {
-  const timeSpan = +end - +start;
-  return [
-    new Date(+start - timeSpan * padding),
-    new Date(+end + timeSpan * padding),
-  ];
-}
-
-function splitText(text: string, maxLineLength: number) {
-  const words = text.split(" ");
-  return words.reduce(
-    (acc, cur) => {
-      const lastLine = acc[acc.length - 1];
-      if (lastLine.length + cur.length <= maxLineLength) {
-        acc[acc.length - 1] = `${
-          acc[acc.length - 1]
-        } ${cur}`;
-      } else {
-        acc.push(cur);
-      }
-      return acc;
-    },
-    [""]
-  );
-}
-
-function createPointEventElement(
-  event: ProcessedPointEvent,
-  alignInfoBox: "left" | "right"
-) {
-  const width = 400;
-  const maxHeight = 600;
-  const imageHeight = width / (16 / 9);
-  const headerHeight = 30;
-  const backgroundColor = "#111";
-
-  const titleLines = splitText(event.title, 40);
-  const textLines = splitText(event.text, 52);
-
-  const height =
-    headerHeight +
-    imageHeight +
-    titleLines.length * 20 +
-    textLines.length * 16 +
-    30;
-
-  const eventElement = d3
-    .create("svg")
-    .classed("pointEvent", true)
-    .attr(
-      "y",
-      getPointEventY(event.topic) - pointEventRadius
-    )
-    .attr("height", Math.min(height, maxHeight));
-  const clipPathId = `circleClipPath_${event.id}`;
-
-  eventElement
-    .append("defs")
-    .append("svg:clipPath")
-    .attr("id", clipPathId)
-    .append("svg:circle")
-    .attr(
-      "cx",
-      alignInfoBox === "left"
-        ? pointEventRadius
-        : width - pointEventRadius
-    )
-    .attr("cy", pointEventRadius)
-    .attr("r", pointEventRadius);
-
-  const clipGroup = eventElement
-    .append("svg:g")
-    .attr("clip-path", `url(#${clipPathId})`);
-
-  clipGroup
-    .append("rect")
-    .attr("width", width)
-    .attr("height", headerHeight)
-    .attr("fill", TOPIC_COLORS[event.topic]);
-
-  clipGroup
-    .append("rect")
-    .attr("y", headerHeight - 1)
-    .attr("width", width)
-    .attr("height", "100%")
-    .attr("fill", backgroundColor);
-
-  clipGroup
-    .append("text")
-    .attr("x", width / 2 - event.topic.length * 4)
-    .attr("y", 20)
-    .text(event.topic)
-    .attr("fill", backgroundColor)
-    .attr("font-size", 16);
-
-  clipGroup
-    .append("image")
-    .attr("y", headerHeight - 1)
-    .attr("width", width)
-    .attr("height", imageHeight)
-    .attr("preserveAspectRatio", "xMidYMid slice")
-    .attr("href", event.image)
-    .style("cursor", "pointer");
-
-  clipGroup
-    .selectAll(".titleLine")
-    .data(titleLines)
-    .enter()
-    .append("text")
-    .attr("x", 10)
-    .attr("y", (_, i) => imageHeight + 50 + i * 20)
-    .text((d) => d)
-    .attr("fill", "#ccc")
-    .style("font-size", 16)
-    .style("font-weight", "bold");
-
-  clipGroup
-    .selectAll(".textLine")
-    .data(textLines)
-    .enter()
-    .append("text")
-    .attr("x", 10)
-    .attr(
-      "y",
-      (_, i) =>
-        imageHeight + 50 + titleLines.length * 20 + i * 16
-    )
-    .text((d) => d)
-    .attr("fill", "#ccc")
-    .style("font-size", 12);
-
-  return eventElement.node();
 }
 
 const axisHeight = 100;
@@ -258,76 +104,13 @@ function createTimeline(
     .selectAll(".spanEvent")
     .data(spanEvents)
     .enter()
-    .append(function (event) {
-      const x = scaleX(event.start);
-      const width = scaleX(event.end) - scaleX(event.start);
-
-      const eventElement = d3
-        .select(this)
-        .append("svg")
-        .classed("spanEvent", true)
-        .attr("x", x)
-        .attr("y", axisHeight)
-        .attr("width", width)
-        .attr("height", spanEventHeight);
-
-      eventElement
-        .append("image")
-        .attr("width", "100%")
-        .attr("height", spanEventHeight * 0.8)
-        .attr("preserveAspectRatio", "xMidYMid slice")
-        .attr("href", event.image);
-
-      const contentElement = eventElement
-        .append("svg")
-        .classed("content", true)
-        .attr("y", spanEventHeight * 0.8)
-        .attr("width", "100%")
-        .attr("height", spanEventHeight * 0.2);
-
-      contentElement
-        .append("rect")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("fill", "#222");
-
-      contentElement
-        .append("text")
-        .text(event.title)
-        .attr("x", 10)
-        .attr("y", 20)
-        .attr("fill", "#fff");
-
-      contentElement
-        .selectAll(".spanEventText")
-        .data(splitText(event.text, 65))
-        .enter()
-        .append("text")
-        .text((d) => d)
-        .attr("x", 10)
-        .attr("y", (_, i) => 40 + i * 16)
-        .style("font-size", 12)
-        .attr("fill", "#ccc");
-
-      contentElement
-        .append("rect")
-        .classed("contentGradient", true)
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("fill", "url(#grayTransparentGradient)");
-
-      eventElement
-        .append("rect")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("fill", "transparent")
-        .attr("stroke", "#000")
-        .attr("stroke-width", 1);
-
-      return eventElement.node();
-    })
+    .append(spanEventElement)
+    .classed("spanEvent", true)
+    .attr("x", (d) => scaleX(d.start))
+    .attr("y", axisHeight)
+    .attr("width", (d) => scaleX(d.end) - scaleX(d.start))
+    .attr("height", spanEventHeight)
     .on("click", function (_, event) {
-      console.log(event);
       const eventDomain = getDomainWithPadding(
         event.start,
         event.end,
@@ -382,13 +165,13 @@ function createTimeline(
       d3.select(this)
         .select("image")
         .transition(transition)
-        .attr("height", spanEventHeight * 0.5);
+        .attr("height", "50%");
 
       d3.select(this)
         .select(".content")
         .transition(transition)
-        .attr("height", spanEventHeight * 0.5)
-        .attr("y", spanEventHeight * 0.5);
+        .attr("height", "50%")
+        .attr("y", "50%");
 
       d3.select(this)
         .select(".contentGradient")
@@ -405,13 +188,13 @@ function createTimeline(
         previousSelectedEvent
           .select("image")
           .transition(transition)
-          .attr("height", spanEventHeight * 0.8);
+          .attr("height", "80%");
 
         previousSelectedEvent
           .select(".content")
           .transition(transition)
-          .attr("height", spanEventHeight * 0.2)
-          .attr("y", spanEventHeight * 0.8);
+          .attr("height", "20%")
+          .attr("y", "80%");
 
         previousSelectedEvent
           .select(".contentGradient")
@@ -437,15 +220,18 @@ function createTimeline(
   const domainMid =
     +domain[0] + (+domain[1] - +domain[0]) / 2;
 
+  let activePointEvent: ProcessedPointEvent | undefined =
+    undefined;
   svg
     .selectAll(".pointEvent")
     .data(pointEvents)
     .enter()
     .append((d) =>
-      createPointEventElement(
-        d,
-        +d.date > domainMid ? "right" : "left"
-      )
+      pointEventElement(d, {
+        alignInfoBox:
+          +d.date > domainMid ? "right" : "left",
+        circleRadius: pointEventRadius,
+      })
     )
     .attr(
       "x",
@@ -455,19 +241,26 @@ function createTimeline(
         (+d.date > domainMid ? 400 : 0)
     )
     .on("mouseover", function (_, d) {
+      if (activePointEvent) {
+        return;
+      }
+      activePointEvent = d;
       d3.selectAll(".pointEvent").sort((a, _) =>
         a === d ? 1 : -1
       );
 
       d3.select(`#circleClipPath_${d.id} circle`)
-        .transition()
+        .transition("showPointEventInfo")
         .duration(500)
         .ease(d3.easePolyIn)
         .attr("r", 1000);
     })
     .on("mouseleave", function (_, d) {
+      if(activePointEvent === d) {
+        activePointEvent = undefined;
+      }
       d3.select(`#circleClipPath_${d.id} circle`)
-        .transition()
+        .transition("hidePointEventInfo")
         .duration(500)
         .ease(d3.easePolyOut)
         .attr("r", pointEventRadius);

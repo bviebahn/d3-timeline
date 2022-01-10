@@ -222,6 +222,7 @@ function createTimeline(
 
   let activePointEvent: ProcessedPointEvent | undefined =
     undefined;
+  let isZoomedIn = false;
   svg
     .selectAll(".pointEvent")
     .data(pointEvents)
@@ -231,6 +232,23 @@ function createTimeline(
         alignInfoBox:
           +d.date > domainMid ? "right" : "left",
         circleRadius: pointEventRadius,
+        onImageClick: () => {
+          isZoomedIn = true;
+          svg
+            .transition()
+            .duration(1000)
+            .attr(
+              "viewBox",
+              `${scaleX(d.date) - 50} 20 500 400`
+            );
+        },
+        onCompressClick: () => {
+          isZoomedIn = false;
+          svg
+            .transition()
+            .duration(1000)
+            .attr("viewBox", `0 0 ${width} ${height}`);
+        },
       })
     )
     .attr(
@@ -241,6 +259,7 @@ function createTimeline(
         (+d.date > domainMid ? 400 : 0)
     )
     .on("mouseover", function (_, d) {
+      console.log("in", d.id);
       if (activePointEvent) {
         return;
       }
@@ -250,17 +269,21 @@ function createTimeline(
       );
 
       d3.select(`#circleClipPath_${d.id} circle`)
-        .transition("showPointEventInfo")
+        .transition(`PointEventInfo_${d.id}`)
         .duration(500)
         .ease(d3.easePolyIn)
         .attr("r", 1000);
     })
     .on("mouseleave", function (_, d) {
-      if(activePointEvent === d) {
+      console.log("out", d.id);
+      if (isZoomedIn) {
+        return;
+      }
+      if (activePointEvent === d) {
         activePointEvent = undefined;
       }
       d3.select(`#circleClipPath_${d.id} circle`)
-        .transition("hidePointEventInfo")
+        .transition(`PointEventInfo_${d.id}`)
         .duration(500)
         .ease(d3.easePolyOut)
         .attr("r", pointEventRadius);

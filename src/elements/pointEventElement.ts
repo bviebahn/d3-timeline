@@ -2,6 +2,7 @@ import * as d3 from "d3";
 
 import { ProcessedPointEvent } from "../types";
 import { splitText } from "../utils";
+import compressIcon from "./compressIcon";
 
 const TOPIC_COLORS = {
   Menschen: "#f94144",
@@ -22,9 +23,13 @@ function pointEventElement(
   {
     alignInfoBox,
     circleRadius,
+    onImageClick,
+    onCompressClick,
   }: {
     alignInfoBox: "left" | "right";
     circleRadius: number;
+    onImageClick: () => void;
+    onCompressClick: () => void;
   }
 ) {
   const width = 400;
@@ -74,6 +79,20 @@ function pointEventElement(
     .attr("height", headerHeight)
     .attr("fill", TOPIC_COLORS[event.topic]);
 
+  const compressButton = clipGroup
+    .append(compressIcon)
+    .attr("x", width - 24)
+    .attr("y", 6)
+    .attr("width", 16)
+    .attr("height", 16)
+    .on("click", function () {
+      d3.select(this).transition().attr("opacity", 0);
+      onCompressClick();
+    })
+    .style("cursor", "pointer")
+    .attr("fill", "#FFF")
+    .attr("opacity", 0);
+
   clipGroup
     .append("rect")
     .attr("y", headerHeight - 1)
@@ -96,7 +115,11 @@ function pointEventElement(
     .attr("height", imageHeight)
     .attr("preserveAspectRatio", "xMidYMid slice")
     .attr("href", event.image)
-    .style("cursor", "pointer");
+    .style("cursor", "pointer")
+    .on("click", () => {
+      compressButton.transition().attr("opacity", 1);
+      onImageClick();
+    });
 
   clipGroup
     .selectAll(".titleLine")

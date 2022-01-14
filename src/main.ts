@@ -34,7 +34,9 @@ function processEvents(
 }
 
 const axisHeight = 100;
-const spanEventHeight = 600;
+const axisSpanEventsGap = 50;
+const spanEventHeight = 500;
+const spanEventMargin = 20;
 const width = 1000;
 const height = 800;
 const pointEventRadius = 8;
@@ -100,15 +102,30 @@ function createTimeline(
     .attr("offset", "95%")
     .attr("stop-color", "#222");
 
+  const spanEventWidth =
+    (width - spanEventMargin * 2) / spanEvents.length;
+
+  const getSpanEventX = (index: number) =>
+    index * spanEventWidth + spanEventMargin;
+
+  const axis = d3.axisTop(scaleX).tickSize(80);
+
+  const axisGroup = svg
+    .append("g")
+    .call(axis)
+    .attr("transform", `translate(0, ${axisHeight})`)
+    .attr("fill", "#fff")
+    .attr("stroke-width", 2);
+
   svg
     .selectAll(".spanEvent")
     .data(spanEvents)
     .enter()
     .append(spanEventElement)
     .classed("spanEvent", true)
-    .attr("x", (d) => scaleX(d.start))
-    .attr("y", axisHeight)
-    .attr("width", (d) => scaleX(d.end) - scaleX(d.start))
+    .attr("x", (_, i) => getSpanEventX(i))
+    .attr("y", axisHeight + axisSpanEventsGap)
+    .attr("width", spanEventWidth)
     .attr("height", spanEventHeight)
     .on("click", function (_, event) {
       const eventDomain = getDomainWithPadding(
@@ -177,6 +194,18 @@ function createTimeline(
         .select(".contentGradient")
         .attr("fill", "transparent");
 
+      d3.selectAll(".spanEventDateLine").each(function (
+        d: any
+      ) {
+        d3.select(this).property("updateScale")(
+          scaleX(d.start),
+          scaleX(d.start),
+          scaleX(d.end),
+          scaleX(d.end),
+          transition
+        );
+      });
+
       if (
         selectedSpanEvent &&
         selectedSpanEvent !== event
@@ -204,19 +233,78 @@ function createTimeline(
       selectedSpanEvent = event;
     });
 
-  const axis = d3.axisTop(scaleX).tickSize(80);
   svg
-    .append("rect")
-    .attr("width", "100%")
-    .attr("height", axisHeight)
-    .attr("fill", "#fff");
+    .selectAll(".spanEventDateLine")
+    .data(spanEvents)
+    .enter()
+    .append(function (event, i) {
+      const startX = scaleX(event.start);
+      const endX = scaleX(event.end);
+      const group = d3.create("svg:g");
 
-  const axisGroup = svg
-    .append("g")
-    .call(axis)
-    .attr("transform", `translate(0, ${axisHeight})`)
-    .attr("fill", "#fff")
-    .attr("stroke-width", 2);
+      const startCircle = group
+        .append("circle")
+        .attr("cx", startX)
+        .attr("cy", axisHeight)
+        .attr("r", 4);
+
+      const endCircle = group
+        .append("circle")
+        .attr("cx", endX)
+        .attr("cy", axisHeight)
+        .attr("r", 4);
+
+      const startLine = group
+        .append("line")
+        .attr("x1", getSpanEventX(i))
+        .attr("y1", axisHeight + axisSpanEventsGap)
+        .attr("x2", startX)
+        .attr("y2", axisHeight)
+        .style("stroke", "black")
+        .style("stroke-width", 1);
+
+      const endLine = group
+        .append("line")
+        .attr("x1", getSpanEventX(i + 1))
+        .attr("y1", axisHeight + axisSpanEventsGap)
+        .attr("x2", endX)
+        .attr("y2", axisHeight)
+        .style("stroke", "black")
+        .style("stroke-width", 1);
+
+      const node = group.node();
+
+      return Object.assign(node, {
+        updateScale: (
+          startSpanX: number,
+          startRealX: number,
+          endSpanX: number,
+          endRealX: number,
+          transition: any
+        ) => {
+          console.log("updatescale");
+          startCircle
+            .transition(transition)
+            .attr("cx", startRealX);
+
+          endCircle
+            .transition(transition)
+            .attr("cx", endRealX);
+
+          startLine
+            .transition(transition)
+            .attr("x1", startSpanX)
+            .attr("x2", startRealX);
+
+          endLine
+            .transition(transition)
+            .attr("x1", endSpanX)
+            .attr("x2", endRealX);
+        },
+      });
+    })
+    .classed("spanEventDateLine", true);
+
   const domainMid =
     +domain[0] + (+domain[1] - +domain[0]) / 2;
 

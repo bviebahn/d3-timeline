@@ -14,6 +14,7 @@ import {
 } from "./types";
 import pointEventElement from "./elements/pointEventElement";
 import spanEventElement from "./elements/spanEventElement";
+import roundedRectangle from "./elements/roundedRectangle";
 
 function processEvents(
   events: (SpanEvent | PointEvent)[]
@@ -44,7 +45,7 @@ const pointEventRadius = 8;
 function createTimeline(
   events: (SpanEvent | PointEvent)[]
 ) {
-  let selectedSpanEvent: ProcessedSpanEvent;
+  let selectedSpanEvent: ProcessedSpanEvent | undefined;
   const processedEvents = processEvents(events);
   const [spanEvents, pointEvents] = processedEvents.reduce(
     (acc, cur) => {
@@ -117,120 +118,151 @@ function createTimeline(
     .attr("fill", "#fff")
     .attr("stroke-width", 2);
 
+  const setSelectedSpanEvent = (
+    event: ProcessedSpanEvent | undefined
+  ) => {
+    const newDomain = getDomainWithPadding(
+      event ? event.start : minDate,
+      event ? event.end : maxDate,
+      event ? 0.5 : 0.05
+    );
+
+    scaleX.domain(newDomain);
+
+    const transition: any = d3
+      .transition()
+      .duration(1000)
+      .ease(d3.easePolyInOut);
+
+    console.log("UPDATE domain", newDomain);
+    const eventDomainMid =
+      +newDomain[0] + (+newDomain[1] - +newDomain[0]) / 2;
+
+    axisGroup
+      .transition(transition)
+      .call(d3.axisTop(scaleX).tickSize(80));
+
+    d3.selectAll<SVGElement, ProcessedPointEvent>(
+      ".pointEvent"
+    )
+      .transition(transition)
+      .attr(
+        "x",
+        (d) =>
+          scaleX(d.date) -
+          pointEventRadius -
+          (+d.date > eventDomainMid ? 400 : 0)
+      )
+      .select("clipPath circle")
+      .attr("cx", (d) => {
+        return +d.date > eventDomainMid
+          ? 400 - pointEventRadius
+          : pointEventRadius;
+      });
+
+    d3.selectAll(".spanEventDateLine").each(function (
+      d: any,
+      i
+    ) {
+      d3.select(this).property("updateScale")(
+        event ? scaleX(d.start) : getSpanEventX(i),
+        scaleX(d.start),
+        event ? scaleX(d.end) : getSpanEventX(i + 1),
+        scaleX(d.end),
+        transition
+      );
+    });
+
+    const spanEvents = d3.selectAll<
+      SVGElement,
+      ProcessedSpanEvent
+    >(".spanEvent");
+
+    spanEvents.style("cursor", (d) =>
+      d === event ? "default" : "pointer"
+    );
+
+    spanEvents
+      .transition(transition)
+      .attr("x", (d, i) =>
+        event ? scaleX(d.start) : getSpanEventX(i)
+      )
+      .attr("width", (d) =>
+        event
+          ? scaleX(d.end) - scaleX(d.start)
+          : spanEventWidth
+      );
+
+    const thisSpanEvent = spanEvents.filter(
+      (d) => d === event
+    );
+
+    thisSpanEvent
+      .select("image")
+      .transition(transition)
+      .attr("height", "50%");
+
+    thisSpanEvent
+      .select(".content")
+      .transition(transition)
+      .attr("height", "50%")
+      .attr("y", "50%");
+
+    thisSpanEvent
+      .select(".contentGradient")
+      .attr("fill", "transparent");
+
+    if (selectedSpanEvent && selectedSpanEvent !== event) {
+      const previousSelectedEvent = spanEvents.filter(
+        (d) => d === selectedSpanEvent
+      );
+
+      previousSelectedEvent
+        .select("image")
+        .transition(transition)
+        .attr("height", "80%");
+
+      previousSelectedEvent
+        .select(".content")
+        .transition(transition)
+        .attr("height", "20%")
+        .attr("y", "80%");
+
+      previousSelectedEvent
+        .select(".contentGradient")
+        .attr("fill", "url(#grayTransparentGradient)");
+    }
+
+    selectedSpanEvent = event;
+  };
+
   svg
     .selectAll(".spanEvent")
     .data(spanEvents)
     .enter()
-    .append(spanEventElement)
+    .append((event) =>
+      spanEventElement(event, {
+        onCompress: () => {
+          setSelectedSpanEvent(undefined);
+        },
+      })
+    )
     .classed("spanEvent", true)
     .attr("x", (_, i) => getSpanEventX(i))
     .attr("y", axisHeight + axisSpanEventsGap)
     .attr("width", spanEventWidth)
     .attr("height", spanEventHeight)
+    .style("cursor", "pointer")
     .on("click", function (_, event) {
-      const eventDomain = getDomainWithPadding(
-        event.start,
-        event.end,
-        0.5
-      );
-      const eventDomainMid =
-        +eventDomain[0] +
-        (+eventDomain[1] - +eventDomain[0]) / 2;
-
-      scaleX.domain(eventDomain);
-
-      const transition: any = d3
-        .transition()
-        .duration(1000)
-        .ease(d3.easePolyInOut);
-
-      axisGroup
-        .transition(transition)
-        .call(d3.axisTop(scaleX).tickSize(80));
-
-      d3.selectAll<SVGElement, ProcessedPointEvent>(
-        ".pointEvent"
-      )
-        .transition(transition)
-        .attr(
-          "x",
-          (d) =>
-            scaleX(d.date) -
-            pointEventRadius -
-            (+d.date > eventDomainMid ? 400 : 0)
-        )
-        .select("clipPath circle")
-        .attr("cx", (d) => {
-          return +d.date > eventDomainMid
-            ? 400 - pointEventRadius
-            : pointEventRadius;
-        });
-
-      const spanEvents = d3.selectAll<
-        SVGElement,
-        ProcessedSpanEvent
-      >(".spanEvent");
-
-      spanEvents
-        .transition(transition)
-        .attr("x", (d) => scaleX(d.start))
-        .attr(
-          "width",
-          (d) => scaleX(d.end) - scaleX(d.start)
-        );
-
-      d3.select(this)
-        .select("image")
-        .transition(transition)
-        .attr("height", "50%");
-
-      d3.select(this)
-        .select(".content")
-        .transition(transition)
-        .attr("height", "50%")
-        .attr("y", "50%");
-
-      d3.select(this)
-        .select(".contentGradient")
-        .attr("fill", "transparent");
-
-      d3.selectAll(".spanEventDateLine").each(function (
-        d: any
-      ) {
-        d3.select(this).property("updateScale")(
-          scaleX(d.start),
-          scaleX(d.start),
-          scaleX(d.end),
-          scaleX(d.end),
-          transition
-        );
-      });
-
-      if (
-        selectedSpanEvent &&
-        selectedSpanEvent !== event
-      ) {
-        const previousSelectedEvent = spanEvents.filter(
-          (d) => d === selectedSpanEvent
-        );
-
-        previousSelectedEvent
-          .select("image")
-          .transition(transition)
-          .attr("height", "80%");
-
-        previousSelectedEvent
-          .select(".content")
-          .transition(transition)
-          .attr("height", "20%")
-          .attr("y", "80%");
-
-        previousSelectedEvent
-          .select(".contentGradient")
-          .attr("fill", "url(#grayTransparentGradient)");
+      if (event === selectedSpanEvent) {
+        return;
       }
-
-      selectedSpanEvent = event;
+      console.log(
+        "CLICK SPAN EVENT",
+        event,
+        selectedSpanEvent
+      );
+      setSelectedSpanEvent(event);
     });
 
   svg
@@ -242,17 +274,81 @@ function createTimeline(
       const endX = scaleX(event.end);
       const group = d3.create("svg:g");
 
+      const startTooltip = group
+        .append("svg")
+        .attr("x", startX)
+        .attr("y", axisHeight - 10)
+        .style("opacity", 0);
+      startTooltip
+        .append(() =>
+          roundedRectangle({
+            x: 20,
+            y: 0,
+            width: 40,
+            height: 2,
+            cornerRadius: 10,
+          })
+        )
+        .attr("fill", "#000000CC");
+
+      startTooltip
+        .append("text")
+        .text(event.start.getFullYear())
+        .attr("x", 22)
+        .attr("y", 16)
+        .attr("fill", "#FFF");
+
       const startCircle = group
         .append("circle")
         .attr("cx", startX)
         .attr("cy", axisHeight)
-        .attr("r", 4);
+        .attr("r", 4)
+        .on("mouseover", function () {
+          startCircle.transition().attr("r", 6);
+          startTooltip.transition().style("opacity", 1);
+        })
+        .on("mouseleave", function () {
+          startCircle.transition().attr("r", 4);
+          startTooltip.transition().style("opacity", 0);
+        });
+
+      const endTooltip = group
+        .append("svg")
+        .attr("x", endX - 70)
+        .attr("y", axisHeight - 10)
+        .style("opacity", 0);
+      endTooltip
+        .append(() =>
+          roundedRectangle({
+            x: 10,
+            y: 0,
+            width: 40,
+            height: 2,
+            cornerRadius: 10,
+          })
+        )
+        .attr("fill", "#000000CC");
+
+      endTooltip
+        .append("text")
+        .text(event.end.getFullYear())
+        .attr("x", 10)
+        .attr("y", 16)
+        .attr("fill", "#FFF");
 
       const endCircle = group
         .append("circle")
         .attr("cx", endX)
         .attr("cy", axisHeight)
-        .attr("r", 4);
+        .attr("r", 4)
+        .on("mouseover", function () {
+          endCircle.transition().attr("r", 6);
+          endTooltip.transition().style("opacity", 1);
+        })
+        .on("mouseleave", function () {
+          endCircle.transition().attr("r", 4);
+          endTooltip.transition().style("opacity", 0);
+        });
 
       const startLine = group
         .append("line")
@@ -282,14 +378,21 @@ function createTimeline(
           endRealX: number,
           transition: any
         ) => {
-          console.log("updatescale");
           startCircle
             .transition(transition)
             .attr("cx", startRealX);
 
+          startTooltip
+            .transition(transition)
+            .attr("x", startRealX);
+
           endCircle
             .transition(transition)
             .attr("cx", endRealX);
+
+          endTooltip
+            .transition(transition)
+            .attr("x", endRealX - 70);
 
           startLine
             .transition(transition)

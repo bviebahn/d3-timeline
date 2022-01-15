@@ -1,10 +1,13 @@
 import * as d3 from "d3";
 import { ProcessedSpanEvent } from "../types";
 import { splitText } from "../utils";
+import compressIcon from "./compressIcon";
 
-function spanEventElement(event: ProcessedSpanEvent) {
-  const eventElement = d3
-    .create("svg");
+function spanEventElement(
+  event: ProcessedSpanEvent,
+  { onCompress }: { onCompress: () => void }
+) {
+  const eventElement = d3.create("svg");
 
   eventElement
     .append("image")
@@ -34,6 +37,19 @@ function spanEventElement(event: ProcessedSpanEvent) {
     .attr("fill", "#fff");
 
   contentElement
+    .append(compressIcon)
+    .attr("x", 475)
+    .attr("y", 10)
+    .attr("width", 16)
+    .attr("height", 16)
+    .attr("fill", "#FFF")
+    .style("cursor", "pointer")
+    .on("click", function(e) {
+      e.stopPropagation();
+      onCompress()
+    });
+
+  contentElement
     .selectAll(".spanEventText")
     .data(splitText(event.text, 65))
     .enter()
@@ -49,7 +65,8 @@ function spanEventElement(event: ProcessedSpanEvent) {
     .classed("contentGradient", true)
     .attr("width", "100%")
     .attr("height", "100%")
-    .attr("fill", "url(#grayTransparentGradient)");
+    .attr("fill", "url(#grayTransparentGradient)")
+    .attr("pointer-events", "none");
 
   eventElement
     .append("rect")
@@ -57,7 +74,8 @@ function spanEventElement(event: ProcessedSpanEvent) {
     .attr("height", "100%")
     .attr("fill", "transparent")
     .attr("stroke", "#000")
-    .attr("stroke-width", 1);
+    .attr("stroke-width", 1)
+    .attr("pointer-events", "none");
 
   return eventElement.node();
 }

@@ -20,7 +20,7 @@ export function getDomainWithPadding(
   start: Date,
   end: Date,
   padding: number
-) {
+): [Date, Date] {
   const timeSpan = +end - +start;
   return [
     new Date(+start - timeSpan * padding),

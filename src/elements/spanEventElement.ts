@@ -13,7 +13,7 @@ function spanEventElement(
     .append("image")
     .attr("width", "100%")
     .attr("height", "80%")
-    .attr("preserveAspectRatio", "xMidYMid slice")
+    .attr("preserveAspectRatio", "xMinYMid slice")
     .attr("href", event.image);
 
   const contentElement = eventElement
@@ -44,9 +44,9 @@ function spanEventElement(
     .attr("height", 16)
     .attr("fill", "#FFF")
     .style("cursor", "pointer")
-    .on("click", function(e) {
+    .on("click", function (e) {
       e.stopPropagation();
-      onCompress()
+      onCompress();
     });
 
   contentElement

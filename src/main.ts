@@ -411,6 +411,21 @@ function createTimeline(
   const domainMid =
     +domain[0] + (+domain[1] - +domain[0]) / 2;
 
+  const getPointEventY = (event: ProcessedPointEvent) => {
+    const eventX = scaleX(event.date);
+    let overlappingEvents = 0;
+    for (let e of pointEvents) {
+      if (e === event) {
+        break;
+      }
+      const eX = scaleX(e.date);
+      if (Math.abs(eventX - eX) < pointEventRadius * 2) {
+        overlappingEvents++;
+      }
+    }
+    return overlappingEvents * 20;
+  };
+
   let activePointEvent: ProcessedPointEvent | undefined =
     undefined;
   let isZoomedIn = false;
@@ -449,6 +464,7 @@ function createTimeline(
         pointEventRadius -
         (+d.date > domainMid ? 400 : 0)
     )
+    .attr("y", (d) => getPointEventY(d) + 40)
     .on("mouseover", function (_, d) {
       console.log("in", d.id);
       if (activePointEvent) {

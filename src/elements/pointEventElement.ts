@@ -51,7 +51,7 @@ function pointEventElement(
   const eventElement = d3
     .create("svg")
     .classed("pointEvent", true)
-    .attr("y", getPointEventY(event.topic))
+    .attr("y", 50)
     .attr("height", Math.min(height, maxHeight));
   const clipPathId = `circleClipPath_${event.id}`;
 
@@ -105,14 +105,6 @@ function pointEventElement(
     .attr("x", width / 2 - event.topic.length * 4)
     .attr("y", 20)
     .text(event.topic)
-    .attr("fill", backgroundColor)
-    .attr("font-size", 16);
-
-  clipGroup
-    .append("text")
-    .attr("x", 20)
-    .attr("y", 20)
-    .text(event.date.getFullYear())
     .attr("fill", backgroundColor)
     .attr("font-size", 16);
 

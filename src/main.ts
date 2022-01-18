@@ -4,7 +4,6 @@ import mockData from "./data";
 import {
   getDomainWithPadding,
   getMinMaxDates,
-  splitText,
 } from "./utils";
 import {
   PointEvent,
@@ -39,7 +38,7 @@ const axisSpanEventsGap = 50;
 const spanEventHeight = 500;
 const spanEventMargin = 20;
 const width = 1000;
-const height = 800;
+const height = 700;
 const pointEventRadius = 8;
 
 function createTimeline(
@@ -363,10 +362,10 @@ function createTimeline(
         .attr("r", 6)
         .attr("fill", "#414141")
         .on("mouseover", function () {
-          highlight(true)
+          highlight(true);
         })
         .on("mouseleave", function () {
-          highlight(false)
+          highlight(false);
         });
       const tooltip = group
         .append("svg")
@@ -394,14 +393,14 @@ function createTimeline(
 
       const highlight = (value: boolean) => {
         circle
-            .transition()
-            .duration(500)
-            .attr("r", value ? 8 : 6)
-            .attr("fill", value ? "#000" : "#414141");
-          tooltip
-            .transition()
-            .style("opacity", value ? 1 : 0);
-      }
+          .transition()
+          .duration(500)
+          .attr("r", value ? 8 : 6)
+          .attr("fill", value ? "#000" : "#414141");
+        tooltip
+          .transition()
+          .style("opacity", value ? 1 : 0);
+      };
 
       return Object.assign(group.node(), {
         updateScale: (newX: number, transition: any) => {
@@ -410,7 +409,7 @@ function createTimeline(
             .transition(transition)
             .attr("x", newX - 40);
         },
-        highlight
+        highlight,
       });
     })
     .classed("dateMarker", true);
@@ -447,12 +446,21 @@ function createTimeline(
         circleRadius: pointEventRadius,
         onImageClick: () => {
           isZoomedIn = true;
+          const currentDomain = scaleX.domain();
+          const currentDomainMid =
+            +currentDomain[0] +
+            (+currentDomain[1] - +currentDomain[0]) / 2;
+          const alignment =
+            +d.date > currentDomainMid ? "left" : "right";
           svg
             .transition()
             .duration(1000)
             .attr(
               "viewBox",
-              `${scaleX(d.date) - 50} 20 500 400`
+              `${
+                scaleX(d.date) -
+                (alignment === "right" ? 55 : 455)
+              } ${getPointEventY(d) + 20} 500 350`
             );
         },
         onCompressClick: () => {

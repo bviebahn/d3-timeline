@@ -48,3 +48,7 @@ export function splitText(
     [""]
   );
 }
+
+export function unique<T extends any[]>(arr: T) {
+  return arr.filter((e, i) => arr.indexOf(e) === i);
+}

@@ -130,11 +130,10 @@ function createTimeline(
     scaleX.domain(newDomain);
 
     const transition: any = d3
-      .transition()
+      .transition("setSelectedSpanEvent")
       .duration(1000)
       .ease(d3.easePolyInOut);
 
-    console.log("UPDATE domain", newDomain);
     const eventDomainMid =
       +newDomain[0] + (+newDomain[1] - +newDomain[0]) / 2;
 
@@ -169,6 +168,12 @@ function createTimeline(
         scaleX(d.start),
         event ? scaleX(d.end) : getSpanEventX(i + 1),
         scaleX(d.end),
+        transition
+      );
+    });
+    d3.selectAll(".dateMarker").each(function (d: any) {
+      d3.select(this).property("updateScale")(
+        scaleX(d),
         transition
       );
     });
@@ -257,12 +262,29 @@ function createTimeline(
       if (event === selectedSpanEvent) {
         return;
       }
-      console.log(
-        "CLICK SPAN EVENT",
-        event,
-        selectedSpanEvent
-      );
       setSelectedSpanEvent(event);
+    })
+    .on("mouseover", function (_, event) {
+      svg
+        .selectAll(".dateMarker")
+        .filter(
+          (d: any) =>
+            +d === +event.start || +d === +event.end
+        )
+        .each(function () {
+          d3.select(this).property("highlight")(true);
+        });
+    })
+    .on("mouseleave", function (_, event) {
+      svg
+        .selectAll(".dateMarker")
+        .filter(
+          (d: any) =>
+            +d === +event.start || +d === +event.end
+        )
+        .each(function () {
+          d3.select(this).property("highlight")(false);
+        });
     });
 
   svg
@@ -273,82 +295,6 @@ function createTimeline(
       const startX = scaleX(event.start);
       const endX = scaleX(event.end);
       const group = d3.create("svg:g");
-
-      const startTooltip = group
-        .append("svg")
-        .attr("x", startX)
-        .attr("y", axisHeight - 10)
-        .style("opacity", 0);
-      startTooltip
-        .append(() =>
-          roundedRectangle({
-            x: 20,
-            y: 0,
-            width: 40,
-            height: 2,
-            cornerRadius: 10,
-          })
-        )
-        .attr("fill", "#000000CC");
-
-      startTooltip
-        .append("text")
-        .text(event.start.getFullYear())
-        .attr("x", 22)
-        .attr("y", 16)
-        .attr("fill", "#FFF");
-
-      const startCircle = group
-        .append("circle")
-        .attr("cx", startX)
-        .attr("cy", axisHeight)
-        .attr("r", 4)
-        .on("mouseover", function () {
-          startCircle.transition().attr("r", 6);
-          startTooltip.transition().style("opacity", 1);
-        })
-        .on("mouseleave", function () {
-          startCircle.transition().attr("r", 4);
-          startTooltip.transition().style("opacity", 0);
-        });
-
-      const endTooltip = group
-        .append("svg")
-        .attr("x", endX - 70)
-        .attr("y", axisHeight - 10)
-        .style("opacity", 0);
-      endTooltip
-        .append(() =>
-          roundedRectangle({
-            x: 10,
-            y: 0,
-            width: 40,
-            height: 2,
-            cornerRadius: 10,
-          })
-        )
-        .attr("fill", "#000000CC");
-
-      endTooltip
-        .append("text")
-        .text(event.end.getFullYear())
-        .attr("x", 10)
-        .attr("y", 16)
-        .attr("fill", "#FFF");
-
-      const endCircle = group
-        .append("circle")
-        .attr("cx", endX)
-        .attr("cy", axisHeight)
-        .attr("r", 4)
-        .on("mouseover", function () {
-          endCircle.transition().attr("r", 6);
-          endTooltip.transition().style("opacity", 1);
-        })
-        .on("mouseleave", function () {
-          endCircle.transition().attr("r", 4);
-          endTooltip.transition().style("opacity", 0);
-        });
 
       const startLine = group
         .append("line")
@@ -378,22 +324,6 @@ function createTimeline(
           endRealX: number,
           transition: any
         ) => {
-          startCircle
-            .transition(transition)
-            .attr("cx", startRealX);
-
-          startTooltip
-            .transition(transition)
-            .attr("x", startRealX);
-
-          endCircle
-            .transition(transition)
-            .attr("cx", endRealX);
-
-          endTooltip
-            .transition(transition)
-            .attr("x", endRealX - 70);
-
           startLine
             .transition(transition)
             .attr("x1", startSpanX)
@@ -407,6 +337,83 @@ function createTimeline(
       });
     })
     .classed("spanEventDateLine", true);
+
+  const uniqueSpanDates = spanEvents
+    .reduce((acc, cur) => {
+      acc.push(cur.start);
+      acc.push(cur.end);
+      return acc;
+    }, [] as Date[])
+    .map((d) => +d)
+    .filter((e, i, arr) => arr.indexOf(e) === i)
+    .map((d) => new Date(d));
+
+  svg
+    .selectAll(".dateMarker")
+    .data(uniqueSpanDates)
+    .enter()
+    .append(function (date) {
+      const group = d3.create("svg:g");
+      const x = scaleX(date);
+
+      const circle = group
+        .append("circle")
+        .attr("cx", x)
+        .attr("cy", axisHeight)
+        .attr("r", 6)
+        .attr("fill", "#414141")
+        .on("mouseover", function () {
+          highlight(true)
+        })
+        .on("mouseleave", function () {
+          highlight(false)
+        });
+      const tooltip = group
+        .append("svg")
+        .attr("x", x - 40)
+        .attr("y", axisHeight + 15)
+        .style("opacity", 0);
+      tooltip
+        .append(() =>
+          roundedRectangle({
+            x: 20,
+            y: 0,
+            width: 40,
+            height: 2,
+            cornerRadius: 10,
+          })
+        )
+        .attr("fill", "#000000CC");
+
+      tooltip
+        .append("text")
+        .text(date.getFullYear())
+        .attr("x", 21)
+        .attr("y", 16.5)
+        .attr("fill", "#FFF");
+
+      const highlight = (value: boolean) => {
+        circle
+            .transition()
+            .duration(500)
+            .attr("r", value ? 8 : 6)
+            .attr("fill", value ? "#000" : "#414141");
+          tooltip
+            .transition()
+            .style("opacity", value ? 1 : 0);
+      }
+
+      return Object.assign(group.node(), {
+        updateScale: (newX: number, transition: any) => {
+          circle.transition(transition).attr("cx", newX);
+          tooltip
+            .transition(transition)
+            .attr("x", newX - 40);
+        },
+        highlight
+      });
+    })
+    .classed("dateMarker", true);
 
   const domainMid =
     +domain[0] + (+domain[1] - +domain[0]) / 2;
@@ -466,7 +473,6 @@ function createTimeline(
     )
     .attr("y", (d) => getPointEventY(d) + 40)
     .on("mouseover", function (_, d) {
-      console.log("in", d.id);
       if (activePointEvent) {
         return;
       }
@@ -482,7 +488,6 @@ function createTimeline(
         .attr("r", 1000);
     })
     .on("mouseleave", function (_, d) {
-      console.log("out", d.id);
       if (isZoomedIn) {
         return;
       }

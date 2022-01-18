@@ -5,7 +5,6 @@ const htwData: (SpanEvent | PointEvent)[] = [
     id: "1",
     start: "1897",
     end: "1933",
-    weight: 2,
     title: "AEG an der Oberspree",
     text: "Für lange Zeit ist die 1598 urkundlich erstmals erwähnte »Schöne Weyde« eine ländlich geprägte Gegend am nördlichen Ufer der Spree. Das älteste nachweisbare Gehöft, der 1682 gegründete „Quappenkrug“, wird als Bauernhof mit Gastwirtschaft geführt. Im Jahr 1814 erwirbt Oberfinanzrat Reinbeck das Anwesen und lässt das Lokal schlossartig ausbauen. Er benennt es nach seiner Frau Wilhelmine „Wilhelminenhof“. Diesen Namen führt ab 1830 auch der erweiterte Gutsbezirk, in dem Mitte des 19. Jahrhunderts insgesamt 116 Menschen leben. Im Jahr der Reichsgründung 1871 geht aus dem Wilhelminenhof der Ort Oberschöneweide hervor. 1889 werden die Ländereien des alten Guts verkauft und parzelliert.",
     image:
@@ -15,7 +14,6 @@ const htwData: (SpanEvent | PointEvent)[] = [
     id: "2",
     start: "1933",
     end: "1945",
-    weight: 2,
     title: "Kriegsproduktion und Zwangsarbeit",
     text: "Auch im KWO gibt es während der NS-Zeit Anhänger_innen und Gegner_innen des Nationalsozialismus. Es sind vor allem KPD-Mitglieder, die sich auf dem Werksgelände organisieren und zum Widerstand gegen das Regime aufrufen.",
     image:
@@ -25,7 +23,6 @@ const htwData: (SpanEvent | PointEvent)[] = [
     id: "3",
     start: "1945",
     end: "1990",
-    weight: 2,
     title: "Kabel für den Sozialismus",
     text: "Nach dem Ende des Zweiten Weltkriegs liegt die Konzernzentrale der AEG, zu der auch das KWO gehört, im sowjetisch besetzten Teil von Berlin.",
     image:
@@ -35,7 +32,6 @@ const htwData: (SpanEvent | PointEvent)[] = [
     id: "4",
     start: "1990",
     end: undefined,
-    weight: 2,
     title: "Vom Kabelwerk zur Denkfabrik",
     text: "Der Wandel des Quartiers zwischen Wilhelminenhofstraße und Spreelauf lässt sich auch an diesem Dreisatz ablesen. Ein bedeutendes Gründerzentrum der Industriemoderne hat sich in einen modernen, lebendigen Hochschulstandort verwandelt: 2009 wird der Campus Wilhelminenhof der Hochschule für Technik und Wirtschaft Berlin eröffnet.",
     image:

@@ -8,7 +8,6 @@ export type BaseEvent = {
 export type SpanEvent = BaseEvent & {
   start: string;
   end: string | undefined;
-  weight?: number;
 };
 
 export type PointEvent = BaseEvent & {

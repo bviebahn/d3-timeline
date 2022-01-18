@@ -55,8 +55,9 @@ function pointEventElement(
     .attr("height", Math.min(height, maxHeight));
   const clipPathId = `circleClipPath_${event.id}`;
 
-  eventElement
-    .append("defs")
+  const defs = eventElement.append("defs");
+
+  defs
     .append("svg:clipPath")
     .attr("id", clipPathId)
     .append("svg:circle")
@@ -68,6 +69,14 @@ function pointEventElement(
     )
     .attr("cy", circleRadius)
     .attr("r", circleRadius);
+
+  defs
+    .append("svg:filter")
+    .attr("id", `blur_${event.id}`)
+    .append("feGaussianBlur")
+    .attr("y", headerHeight - 1)
+    .attr("in", "SourceGraphic")
+    .attr("stdDeviation", 4);
 
   const clipGroup = eventElement
     .append("svg:g")
@@ -116,7 +125,22 @@ function pointEventElement(
     .attr("preserveAspectRatio", "xMidYMid slice")
     .attr("href", event.image)
     .style("cursor", "pointer")
-    .on("click", () => {
+    .style("opacity", 0.4)
+    .attr("filter", `url(#blur_${event.id})`)
+    .on("click", function () {
+      compressButton.transition().attr("opacity", 1);
+      onImageClick();
+    });
+
+  clipGroup
+    .append("image")
+    .attr("y", headerHeight - 1)
+    .attr("width", width)
+    .attr("height", imageHeight)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .attr("href", event.image)
+    .style("cursor", "pointer")
+    .on("click", function () {
       compressButton.transition().attr("opacity", 1);
       onImageClick();
     });

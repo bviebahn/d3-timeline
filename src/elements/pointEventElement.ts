@@ -10,14 +10,6 @@ const TOPIC_COLORS = {
   Produktion: "#0082D1",
 };
 
-function getPointEventY(topic: string) {
-  return topic === "Menschen"
-    ? 30
-    : topic === "Ort"
-    ? 50
-    : 70;
-}
-
 function pointEventElement(
   event: ProcessedPointEvent,
   {
@@ -33,8 +25,8 @@ function pointEventElement(
   }
 ) {
   const width = 400;
-  const maxHeight = 600;
-  const imageHeight = width / (16 / 9);
+  const maxHeight = 650;
+  const imageHeight = 300;
   const headerHeight = 30;
   const backgroundColor = "#111";
 

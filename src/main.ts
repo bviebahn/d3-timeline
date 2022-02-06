@@ -1,10 +1,7 @@
 import "./style.css";
 import * as d3 from "d3";
 import mockData from "./data";
-import {
-  getDomainWithPadding,
-  getMinMaxDates,
-} from "./utils";
+import { getDomainWithPadding, getMinMaxDates } from "./utils";
 import {
   PointEvent,
   ProcessedPointEvent,
@@ -41,9 +38,7 @@ const width = 1000;
 const height = 700;
 const pointEventRadius = 8;
 
-function createTimeline(
-  events: (SpanEvent | PointEvent)[]
-) {
+function createTimeline(events: (SpanEvent | PointEvent)[]) {
   let selectedSpanEvent: ProcessedSpanEvent | undefined;
   const processedEvents = processEvents(events);
   const [spanEvents, pointEvents] = processedEvents.reduce(
@@ -55,10 +50,7 @@ function createTimeline(
       }
       return acc;
     },
-    [[], []] as [
-      ProcessedSpanEvent[],
-      ProcessedPointEvent[]
-    ]
+    [[], []] as [ProcessedSpanEvent[], ProcessedPointEvent[]]
   );
 
   const allDates = processedEvents.reduce((acc, cur) => {
@@ -71,20 +63,11 @@ function createTimeline(
     return acc;
   }, [] as Date[]);
   const [minDate, maxDate] = getMinMaxDates(allDates);
-  const domain = getDomainWithPadding(
-    minDate,
-    maxDate,
-    0.05
-  );
+  const domain = getDomainWithPadding(minDate, maxDate, 0.05);
 
-  const scaleX = d3
-    .scaleUtc()
-    .domain(domain)
-    .range([0, width]);
+  const scaleX = d3.scaleUtc().domain(domain).range([0, width]);
 
-  const svg = d3
-    .create("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`);
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
   const grayTransparentGradient = svg
     .append("svg:defs")
@@ -102,8 +85,7 @@ function createTimeline(
     .attr("offset", "95%")
     .attr("stop-color", "#222");
 
-  const spanEventWidth =
-    (width - spanEventMargin * 2) / spanEvents.length;
+  const spanEventWidth = (width - spanEventMargin * 2) / spanEvents.length;
 
   const getSpanEventX = (index: number) =>
     index * spanEventWidth + spanEventMargin;
@@ -117,9 +99,7 @@ function createTimeline(
     .attr("fill", "#fff")
     .attr("stroke-width", 2);
 
-  const setSelectedSpanEvent = (
-    event: ProcessedSpanEvent | undefined
-  ) => {
+  const setSelectedSpanEvent = (event: ProcessedSpanEvent | undefined) => {
     const newDomain = getDomainWithPadding(
       event ? event.start : minDate,
       event ? event.end : maxDate,
@@ -133,16 +113,11 @@ function createTimeline(
       .duration(1000)
       .ease(d3.easePolyInOut);
 
-    const eventDomainMid =
-      +newDomain[0] + (+newDomain[1] - +newDomain[0]) / 2;
+    const eventDomainMid = +newDomain[0] + (+newDomain[1] - +newDomain[0]) / 2;
 
-    axisGroup
-      .transition(transition)
-      .call(d3.axisTop(scaleX).tickSize(80));
+    axisGroup.transition(transition).call(d3.axisTop(scaleX).tickSize(80));
 
-    d3.selectAll<SVGElement, ProcessedPointEvent>(
-      ".pointEvent"
-    )
+    d3.selectAll<SVGElement, ProcessedPointEvent>(".pointEvent")
       .transition(transition)
       .attr(
         "x",
@@ -158,10 +133,7 @@ function createTimeline(
           : pointEventRadius;
       });
 
-    d3.selectAll(".spanEventDateLine").each(function (
-      d: any,
-      i
-    ) {
+    d3.selectAll(".spanEventDateLine").each(function (d: any, i) {
       d3.select(this).property("updateScale")(
         event ? scaleX(d.start) : getSpanEventX(i),
         scaleX(d.start),
@@ -171,40 +143,25 @@ function createTimeline(
       );
     });
     d3.selectAll(".dateMarker").each(function (d: any) {
-      d3.select(this).property("updateScale")(
-        scaleX(d),
-        transition
-      );
+      d3.select(this).property("updateScale")(scaleX(d), transition);
     });
 
-    const spanEvents = d3.selectAll<
-      SVGElement,
-      ProcessedSpanEvent
-    >(".spanEvent");
-
-    spanEvents.style("cursor", (d) =>
-      d === event ? "default" : "pointer"
+    const spanEvents = d3.selectAll<SVGElement, ProcessedSpanEvent>(
+      ".spanEvent"
     );
+
+    spanEvents.style("cursor", (d) => (d === event ? "default" : "pointer"));
 
     spanEvents
       .transition(transition)
-      .attr("x", (d, i) =>
-        event ? scaleX(d.start) : getSpanEventX(i)
-      )
+      .attr("x", (d, i) => (event ? scaleX(d.start) : getSpanEventX(i)))
       .attr("width", (d) =>
-        event
-          ? scaleX(d.end) - scaleX(d.start)
-          : spanEventWidth
+        event ? scaleX(d.end) - scaleX(d.start) : spanEventWidth
       );
 
-    const thisSpanEvent = spanEvents.filter(
-      (d) => d === event
-    );
+    const thisSpanEvent = spanEvents.filter((d) => d === event);
 
-    thisSpanEvent
-      .select("image")
-      .transition(transition)
-      .attr("height", "50%");
+    thisSpanEvent.select("image").transition(transition).attr("height", "50%");
 
     thisSpanEvent
       .select(".content")
@@ -212,9 +169,7 @@ function createTimeline(
       .attr("height", "50%")
       .attr("y", "50%");
 
-    thisSpanEvent
-      .select(".contentGradient")
-      .attr("fill", "transparent");
+    thisSpanEvent.select(".contentGradient").attr("fill", "transparent");
 
     if (selectedSpanEvent && selectedSpanEvent !== event) {
       const previousSelectedEvent = spanEvents.filter(
@@ -266,10 +221,7 @@ function createTimeline(
     .on("mouseover", function (_, event) {
       svg
         .selectAll(".dateMarker")
-        .filter(
-          (d: any) =>
-            +d === +event.start || +d === +event.end
-        )
+        .filter((d: any) => +d === +event.start || +d === +event.end)
         .each(function () {
           d3.select(this).property("highlight")(true);
         });
@@ -277,10 +229,7 @@ function createTimeline(
     .on("mouseleave", function (_, event) {
       svg
         .selectAll(".dateMarker")
-        .filter(
-          (d: any) =>
-            +d === +event.start || +d === +event.end
-        )
+        .filter((d: any) => +d === +event.start || +d === +event.end)
         .each(function () {
           d3.select(this).property("highlight")(false);
         });
@@ -397,25 +346,20 @@ function createTimeline(
           .duration(500)
           .attr("r", value ? 8 : 6)
           .attr("fill", value ? "#000" : "#414141");
-        tooltip
-          .transition()
-          .style("opacity", value ? 1 : 0);
+        tooltip.transition().style("opacity", value ? 1 : 0);
       };
 
       return Object.assign(group.node(), {
         updateScale: (newX: number, transition: any) => {
           circle.transition(transition).attr("cx", newX);
-          tooltip
-            .transition(transition)
-            .attr("x", newX - 40);
+          tooltip.transition(transition).attr("x", newX - 40);
         },
         highlight,
       });
     })
     .classed("dateMarker", true);
 
-  const domainMid =
-    +domain[0] + (+domain[1] - +domain[0]) / 2;
+  const domainMid = +domain[0] + (+domain[1] - +domain[0]) / 2;
 
   const getPointEventY = (event: ProcessedPointEvent) => {
     const eventX = scaleX(event.date);
@@ -432,8 +376,7 @@ function createTimeline(
     return overlappingEvents * 20;
   };
 
-  let activePointEvent: ProcessedPointEvent | undefined =
-    undefined;
+  let activePointEvent: ProcessedPointEvent | undefined = undefined;
   let isZoomedIn = false;
   svg
     .selectAll(".pointEvent")
@@ -441,26 +384,22 @@ function createTimeline(
     .enter()
     .append((d) =>
       pointEventElement(d, {
-        alignInfoBox:
-          +d.date > domainMid ? "right" : "left",
+        alignInfoBox: +d.date > domainMid ? "right" : "left",
         circleRadius: pointEventRadius,
         onImageClick: () => {
           isZoomedIn = true;
           const currentDomain = scaleX.domain();
           const currentDomainMid =
-            +currentDomain[0] +
-            (+currentDomain[1] - +currentDomain[0]) / 2;
-          const alignment =
-            +d.date > currentDomainMid ? "left" : "right";
+            +currentDomain[0] + (+currentDomain[1] - +currentDomain[0]) / 2;
+          const alignment = +d.date > currentDomainMid ? "left" : "right";
           svg
             .transition()
             .duration(1000)
             .attr(
               "viewBox",
-              `${
-                scaleX(d.date) -
-                (alignment === "right" ? 55 : 455)
-              } ${getPointEventY(d) + 20} 500 350`
+              `${scaleX(d.date) - (alignment === "right" ? 55 : 455)} ${
+                getPointEventY(d) + 20
+              } 500 350`
             );
         },
         onCompressClick: () => {
@@ -474,10 +413,7 @@ function createTimeline(
     )
     .attr(
       "x",
-      (d) =>
-        scaleX(d.date) -
-        pointEventRadius -
-        (+d.date > domainMid ? 400 : 0)
+      (d) => scaleX(d.date) - pointEventRadius - (+d.date > domainMid ? 400 : 0)
     )
     .attr("y", (d) => getPointEventY(d) + 40)
     .on("mouseover", function (_, d) {
@@ -485,9 +421,7 @@ function createTimeline(
         return;
       }
       activePointEvent = d;
-      d3.selectAll(".pointEvent").sort((a, _) =>
-        a === d ? 1 : -1
-      );
+      d3.selectAll(".pointEvent").sort((a, _) => (a === d ? 1 : -1));
 
       d3.select(`#circleClipPath_${d.id} circle`)
         .transition(`PointEventInfo_${d.id}`)
@@ -512,6 +446,4 @@ function createTimeline(
   return svg.node()!;
 }
 
-document
-  .getElementById("app")
-  ?.appendChild(createTimeline(mockData));
+document.getElementById("app")?.appendChild(createTimeline(mockData));

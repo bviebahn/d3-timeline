@@ -9,6 +9,7 @@
     "test": "jest"
   },
   "devDependencies": {
+    "@playwright/test": "^1.18.1",
     "@types/jest": "^27.4.0",
     "@types/markdown-it": "^12.2.3",
     "@types/node": "^17.0.15",

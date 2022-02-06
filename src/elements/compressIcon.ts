@@ -6,7 +6,8 @@ const compressPath =
 function compressIcon() {
   const icon = d3
     .create("svg")
-    .attr("viewBox", "0 0 448 512");
+    .attr("viewBox", "0 0 448 512")
+    .classed("compressIcon", true);
 
   icon
     .append("rect")

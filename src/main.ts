@@ -320,7 +320,9 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
         .append("svg")
         .attr("x", x - 40)
         .attr("y", axisHeight + 15)
-        .style("opacity", 0);
+        .style("opacity", 0)
+        .classed("tooltip", true);
+
       tooltip
         .append(() =>
           roundedRectangle({

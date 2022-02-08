@@ -251,7 +251,9 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
         .attr("x2", startX)
         .attr("y2", axisHeight)
         .style("stroke", "black")
-        .style("stroke-width", 1);
+        .style("stroke-width", 1)
+        .style("stroke-linecap", "round")
+        .classed("startLine", true);
 
       const endLine = group
         .append("line")
@@ -260,7 +262,9 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
         .attr("x2", endX)
         .attr("y2", axisHeight)
         .style("stroke", "black")
-        .style("stroke-width", 1);
+        .style("stroke-width", 1)
+        .style("stroke-linecap", "round")
+        .classed("endLine", true);
 
       const node = group.node();
 
@@ -349,6 +353,18 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
           .attr("r", value ? 8 : 6)
           .attr("fill", value ? "#000" : "#414141");
         tooltip.transition().style("opacity", value ? 1 : 0);
+
+        d3.selectAll(".spanEventDateLine")
+          .filter((s: any) => +s.start === +date)
+          .selectAll(".startLine")
+          .transition()
+          .style("stroke-width", value ? 3 : 1);
+
+        d3.selectAll(".spanEventDateLine")
+          .filter((s: any) => +s.end === +date)
+          .selectAll(".endLine")
+          .transition()
+          .style("stroke-width", value ? 3 : 1);
       };
 
       return Object.assign(group.node(), {

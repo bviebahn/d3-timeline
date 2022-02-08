@@ -417,7 +417,7 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
       "x",
       (d) => scaleX(d.date) - pointEventRadius - (+d.date > domainMid ? 400 : 0)
     )
-    .attr("y", (d) => getPointEventY(d) + 40)
+    .attr("y", (d) => 60 - getPointEventY(d))
     .on("mouseover", function (_, d) {
       if (activePointEvent) {
         return;

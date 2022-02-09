@@ -103,7 +103,9 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
     .call(axis)
     .attr("transform", `translate(0, ${axisHeight})`)
     .attr("fill", "#fff")
-    .attr("stroke-width", 2);
+    .attr("stroke-width", 2)
+    .style("font-size", 18)
+    // .style("font-family", "FiraCode");
 
   const setSelectedSpanEvent = (event: ProcessedSpanEvent | undefined) => {
     const newDomain = getDomainWithPadding(
@@ -121,7 +123,7 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
 
     const eventDomainMid = +newDomain[0] + (+newDomain[1] - +newDomain[0]) / 2;
 
-    axisGroup.transition(transition).call(d3.axisTop(scaleX).tickSize(80));
+    axisGroup.transition(transition).call(d3.axisTop(scaleX).tickSize(axisHeight - 20));
 
     d3.selectAll<SVGElement, ProcessedPointEvent>(".pointEvent")
       .transition(transition)
@@ -312,11 +314,13 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
 
           startCircle.transition(transition).attr("cx", startRealX);
           endCircle.transition(transition).attr("cx", endRealX);
+          startTooltip.transition(transition).attr("x", startRealX - 40);
+          endTooltip.transition(transition).attr("x", endRealX - 40);
         },
         highlight: (value: boolean) => {
           path
             .transition()
-            .attr("fill", value ? "#CCC" : "transparent")
+            .attr("fill", value ? "#6667ab" : "transparent")
             .attr("stroke-width", value ? 2 : 1);
           startCircle.transition().attr("r", value ? 8 : 6);
           endCircle.transition().attr("r", value ? 8 : 6);

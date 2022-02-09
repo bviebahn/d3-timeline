@@ -47,12 +47,4 @@ test.describe("Span events", () => {
     await page.waitForSelector(".tooltip >> text=1945");
     await page.waitForSelector(".tooltip >> text=1990");
   });
-
-  test("should show year tooltip when hovering over connection point", async ({
-    page,
-  }) => {
-    await page.waitForSelector(".dateMarker");
-    await page.locator(".dateMarker:nth-child(14) circle").hover();
-    await page.waitForSelector(".tooltip >> text=1945");
-  });
 });

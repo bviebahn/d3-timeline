@@ -148,9 +148,6 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
         transition
       );
     });
-    d3.selectAll(".dateMarker").each(function (d: any) {
-      d3.select(this).property("updateScale")(scaleX(d), transition);
-    });
 
     const spanEvents = d3.selectAll<SVGElement, ProcessedSpanEvent>(
       ".spanEvent"
@@ -329,68 +326,6 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
       });
     })
     .classed("spanEventDateLine", true);
-
-  // const uniqueSpanDates = spanEvents
-  //   .reduce((acc, cur) => {
-  //     acc.push(cur.start);
-  //     acc.push(cur.end);
-  //     return acc;
-  //   }, [] as Date[])
-  //   .map((d) => +d)
-  //   .filter((e, i, arr) => arr.indexOf(e) === i)
-  //   .map((d) => new Date(d));
-
-  // svg
-  //   .selectAll(".dateMarker")
-  //   .data(uniqueSpanDates)
-  //   .enter()
-  //   .append(function (date) {
-  //     const group = d3.create("svg:g");
-  //     const x = scaleX(date);
-
-  //     const circle = group
-  //       .append("circle")
-  //       .attr("cx", x)
-  //       .attr("cy", axisHeight)
-  //       .attr("r", 6)
-  //       .attr("fill", "#414141")
-  //       .on("mouseover", function () {
-  //         highlight(true);
-  //       })
-  //       .on("mouseleave", function () {
-  //         highlight(false);
-  //       });
-
-  //     const highlight = (value: boolean) => {
-  //       circle
-  //         .transition()
-  //         .duration(500)
-  //         .attr("r", value ? 8 : 6)
-  //         .attr("fill", value ? "#000" : "#414141");
-  //       tooltip.transition().style("opacity", value ? 1 : 0);
-
-  //       d3.selectAll(".spanEventDateLine")
-  //         .filter((s: any) => +s.start === +date)
-  //         .selectAll(".startLine")
-  //         .transition()
-  //         .style("stroke-width", value ? 3 : 1);
-
-  //       d3.selectAll(".spanEventDateLine")
-  //         .filter((s: any) => +s.end === +date)
-  //         .selectAll(".endLine")
-  //         .transition()
-  //         .style("stroke-width", value ? 3 : 1);
-  //     };
-
-  //     return Object.assign(group.node(), {
-  //       updateScale: (newX: number, transition: any) => {
-  //         circle.transition(transition).attr("cx", newX);
-  //         tooltip.transition(transition).attr("x", newX - 40);
-  //       },
-  //       highlight,
-  //     });
-  //   })
-  //   .classed("dateMarker", true);
 
   const domainMid = +domain[0] + (+domain[1] - +domain[0]) / 2;
 

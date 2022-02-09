@@ -1,7 +1,11 @@
 import "./style.css";
 import * as d3 from "d3";
 import mockData from "./data";
-import { getDomainWithPadding, getMinMaxDates } from "./utils";
+import {
+  getDomainWithPadding,
+  getMaxOverlappingEvents,
+  getMinMaxDates,
+} from "./utils";
 import {
   PointEvent,
   ProcessedPointEvent,
@@ -10,7 +14,7 @@ import {
 } from "./types";
 import pointEventElement from "./elements/pointEventElement";
 import spanEventElement from "./elements/spanEventElement";
-import roundedRectangle from "./elements/roundedRectangle";
+import tooltip from "./elements/tooltip";
 
 function processEvents(
   events: (SpanEvent | PointEvent)[]
@@ -30,12 +34,10 @@ function processEvents(
   });
 }
 
-const axisHeight = 100;
 const axisSpanEventsGap = 50;
-const spanEventHeight = 500;
 const spanEventMargin = 20;
 const width = 1000;
-const height = 700;
+const height = 600;
 const pointEventRadius = 8;
 
 function createTimeline(events: (SpanEvent | PointEvent)[]) {
@@ -66,6 +68,12 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
   const domain = getDomainWithPadding(minDate, maxDate, 0.05);
 
   const scaleX = d3.scaleUtc().domain(domain).range([0, width]);
+  const axisHeight =
+    getMaxOverlappingEvents(pointEvents, scaleX, pointEventRadius) * 20 + 100;
+
+  const spanEventHeight = height - axisHeight - axisSpanEventsGap;
+
+  const axis = d3.axisTop(scaleX).tickSize(axisHeight - 20);
 
   const svg = d3.create("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
@@ -89,8 +97,6 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
 
   const getSpanEventX = (index: number) =>
     index * spanEventWidth + spanEventMargin;
-
-  const axis = d3.axisTop(scaleX).tickSize(80);
 
   const axisGroup = svg
     .append("g")
@@ -220,16 +226,16 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
     })
     .on("mouseover", function (_, event) {
       svg
-        .selectAll(".dateMarker")
-        .filter((d: any) => +d === +event.start || +d === +event.end)
+        .selectAll(".spanEventDateLine")
+        .filter((d: any) => d === event)
         .each(function () {
           d3.select(this).property("highlight")(true);
         });
     })
     .on("mouseleave", function (_, event) {
       svg
-        .selectAll(".dateMarker")
-        .filter((d: any) => +d === +event.start || +d === +event.end)
+        .selectAll(".spanEventDateLine")
+        .filter((d: any) => d === event)
         .each(function () {
           d3.select(this).property("highlight")(false);
         });
@@ -244,27 +250,51 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
       const endX = scaleX(event.end);
       const group = d3.create("svg:g");
 
-      const startLine = group
-        .append("line")
-        .attr("x1", getSpanEventX(i))
-        .attr("y1", axisHeight + axisSpanEventsGap)
-        .attr("x2", startX)
-        .attr("y2", axisHeight)
-        .style("stroke", "black")
-        .style("stroke-width", 1)
-        .style("stroke-linecap", "round")
-        .classed("startLine", true);
+      const y1 = axisHeight;
+      const y2 = axisHeight + axisSpanEventsGap;
 
-      const endLine = group
-        .append("line")
-        .attr("x1", getSpanEventX(i + 1))
-        .attr("y1", axisHeight + axisSpanEventsGap)
-        .attr("x2", endX)
-        .attr("y2", axisHeight)
-        .style("stroke", "black")
-        .style("stroke-width", 1)
-        .style("stroke-linecap", "round")
-        .classed("endLine", true);
+      const path = group
+        .append("svg:polygon")
+        .attr(
+          "points",
+          `${getSpanEventX(
+            i
+          )},${y2} ${startX},${y1} ${endX},${y1} ${getSpanEventX(
+            i + 1
+          )}, ${y2}}`
+        )
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1)
+        .attr("fill", "transparent")
+        .attr("stroke-linejoin", "bevel");
+
+      const startCircle = group
+        .append("circle")
+        .attr("cx", startX)
+        .attr("cy", axisHeight)
+        .attr("r", 6)
+        .attr("fill", "#414141");
+
+      const endCircle = group
+        .append("circle")
+        .attr("cx", endX)
+        .attr("cy", axisHeight)
+        .attr("r", 6)
+        .attr("fill", "#414141");
+
+      const startTooltip = group
+        .append(() => tooltip(`${event.start.getFullYear()}`))
+        .attr("x", startX - 40)
+        .attr("y", axisHeight - 35)
+        .style("opacity", 0)
+        .classed("tooltip", true);
+
+      const endTooltip = group
+        .append(() => tooltip(`${event.end.getFullYear()}`))
+        .attr("x", endX - 40)
+        .attr("y", axisHeight - 35)
+        .style("opacity", 0)
+        .classed("tooltip", true);
 
       const node = group.node();
 
@@ -276,106 +306,91 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
           endRealX: number,
           transition: any
         ) => {
-          startLine
+          path
             .transition(transition)
-            .attr("x1", startSpanX)
-            .attr("x2", startRealX);
+            .attr(
+              "points",
+              `${startSpanX},${y2} ${startRealX},${y1} ${endRealX},${y1} ${endSpanX}, ${y2}}`
+            );
 
-          endLine
-            .transition(transition)
-            .attr("x1", endSpanX)
-            .attr("x2", endRealX);
+          startCircle.transition(transition).attr("cx", startRealX);
+          endCircle.transition(transition).attr("cx", endRealX);
+        },
+        highlight: (value: boolean) => {
+          path
+            .transition()
+            .attr("fill", value ? "#CCC" : "transparent")
+            .attr("stroke-width", value ? 2 : 1);
+          startCircle.transition().attr("r", value ? 8 : 6);
+          endCircle.transition().attr("r", value ? 8 : 6);
+          startTooltip.transition().style("opacity", value ? 1 : 0);
+          endTooltip.transition().style("opacity", value ? 1 : 0);
         },
       });
     })
     .classed("spanEventDateLine", true);
 
-  const uniqueSpanDates = spanEvents
-    .reduce((acc, cur) => {
-      acc.push(cur.start);
-      acc.push(cur.end);
-      return acc;
-    }, [] as Date[])
-    .map((d) => +d)
-    .filter((e, i, arr) => arr.indexOf(e) === i)
-    .map((d) => new Date(d));
+  // const uniqueSpanDates = spanEvents
+  //   .reduce((acc, cur) => {
+  //     acc.push(cur.start);
+  //     acc.push(cur.end);
+  //     return acc;
+  //   }, [] as Date[])
+  //   .map((d) => +d)
+  //   .filter((e, i, arr) => arr.indexOf(e) === i)
+  //   .map((d) => new Date(d));
 
-  svg
-    .selectAll(".dateMarker")
-    .data(uniqueSpanDates)
-    .enter()
-    .append(function (date) {
-      const group = d3.create("svg:g");
-      const x = scaleX(date);
+  // svg
+  //   .selectAll(".dateMarker")
+  //   .data(uniqueSpanDates)
+  //   .enter()
+  //   .append(function (date) {
+  //     const group = d3.create("svg:g");
+  //     const x = scaleX(date);
 
-      const circle = group
-        .append("circle")
-        .attr("cx", x)
-        .attr("cy", axisHeight)
-        .attr("r", 6)
-        .attr("fill", "#414141")
-        .on("mouseover", function () {
-          highlight(true);
-        })
-        .on("mouseleave", function () {
-          highlight(false);
-        });
-      const tooltip = group
-        .append("svg")
-        .attr("x", x - 40)
-        .attr("y", axisHeight + 15)
-        .style("opacity", 0)
-        .classed("tooltip", true);
+  //     const circle = group
+  //       .append("circle")
+  //       .attr("cx", x)
+  //       .attr("cy", axisHeight)
+  //       .attr("r", 6)
+  //       .attr("fill", "#414141")
+  //       .on("mouseover", function () {
+  //         highlight(true);
+  //       })
+  //       .on("mouseleave", function () {
+  //         highlight(false);
+  //       });
 
-      tooltip
-        .append(() =>
-          roundedRectangle({
-            x: 20,
-            y: 0,
-            width: 40,
-            height: 2,
-            cornerRadius: 10,
-          })
-        )
-        .attr("fill", "#000000CC");
+  //     const highlight = (value: boolean) => {
+  //       circle
+  //         .transition()
+  //         .duration(500)
+  //         .attr("r", value ? 8 : 6)
+  //         .attr("fill", value ? "#000" : "#414141");
+  //       tooltip.transition().style("opacity", value ? 1 : 0);
 
-      tooltip
-        .append("text")
-        .text(date.getFullYear())
-        .attr("x", 21)
-        .attr("y", 16.5)
-        .attr("fill", "#FFF");
+  //       d3.selectAll(".spanEventDateLine")
+  //         .filter((s: any) => +s.start === +date)
+  //         .selectAll(".startLine")
+  //         .transition()
+  //         .style("stroke-width", value ? 3 : 1);
 
-      const highlight = (value: boolean) => {
-        circle
-          .transition()
-          .duration(500)
-          .attr("r", value ? 8 : 6)
-          .attr("fill", value ? "#000" : "#414141");
-        tooltip.transition().style("opacity", value ? 1 : 0);
+  //       d3.selectAll(".spanEventDateLine")
+  //         .filter((s: any) => +s.end === +date)
+  //         .selectAll(".endLine")
+  //         .transition()
+  //         .style("stroke-width", value ? 3 : 1);
+  //     };
 
-        d3.selectAll(".spanEventDateLine")
-          .filter((s: any) => +s.start === +date)
-          .selectAll(".startLine")
-          .transition()
-          .style("stroke-width", value ? 3 : 1);
-
-        d3.selectAll(".spanEventDateLine")
-          .filter((s: any) => +s.end === +date)
-          .selectAll(".endLine")
-          .transition()
-          .style("stroke-width", value ? 3 : 1);
-      };
-
-      return Object.assign(group.node(), {
-        updateScale: (newX: number, transition: any) => {
-          circle.transition(transition).attr("cx", newX);
-          tooltip.transition(transition).attr("x", newX - 40);
-        },
-        highlight,
-      });
-    })
-    .classed("dateMarker", true);
+  //     return Object.assign(group.node(), {
+  //       updateScale: (newX: number, transition: any) => {
+  //         circle.transition(transition).attr("cx", newX);
+  //         tooltip.transition(transition).attr("x", newX - 40);
+  //       },
+  //       highlight,
+  //     });
+  //   })
+  //   .classed("dateMarker", true);
 
   const domainMid = +domain[0] + (+domain[1] - +domain[0]) / 2;
 

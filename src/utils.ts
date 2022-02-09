@@ -51,3 +51,27 @@ export function splitText(text: string, maxLineLength: number) {
     [""]
   );
 }
+
+export function getMaxOverlappingEvents(
+  events: { date: Date }[],
+  scaleX: (d: Date) => number,
+  pointRadius: number
+) {
+  let maxOverlaps = 0;
+  for (let i = 0; i < events.length - 1; i++) {
+    let overlaps = 0;
+    for (let j = i + 1; j < events.length; j++) {
+      const ax = scaleX(events[i].date);
+      const bx = scaleX(events[j].date);
+
+      if (Math.abs(ax - bx) < pointRadius * 2) {
+        overlaps++;
+      }
+    }
+    if (overlaps > maxOverlaps) {
+      maxOverlaps = overlaps;
+    }
+  }
+
+  return maxOverlaps;
+}

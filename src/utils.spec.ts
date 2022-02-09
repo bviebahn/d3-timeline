@@ -1,4 +1,9 @@
-import { getMinMaxDates, getDomainWithPadding, splitText } from "./utils";
+import {
+  getMinMaxDates,
+  getDomainWithPadding,
+  splitText,
+  getMaxOverlappingEvents,
+} from "./utils";
 
 describe("getMinMaxDates", () => {
   test("should return correct min and max dates", () => {
@@ -101,5 +106,146 @@ describe("splitText", () => {
         10000
       )
     ).toMatchSnapshot();
+  });
+});
+
+describe("getMaxOverlappingEvents", () => {
+  test("should correctly calculate overlapping events", () => {
+    expect(
+      getMaxOverlappingEvents(
+        [
+          {
+            date: new Date("1991"),
+          },
+          {
+            date: new Date("1992"),
+          },
+          {
+            date: new Date("1997"),
+          },
+          {
+            date: new Date("1919"),
+          },
+          {
+            date: new Date("1911"),
+          },
+          {
+            date: new Date("1901"),
+          },
+          {
+            date: new Date("1916"),
+          },
+          {
+            date: new Date("1945"),
+          },
+        ],
+        (d) => +d / 100000000000,
+        5
+      )
+    ).toEqual(4);
+
+    expect(
+      getMaxOverlappingEvents(
+        [
+          {
+            date: new Date("1991"),
+          },
+          {
+            date: new Date("1992"),
+          },
+          {
+            date: new Date("1997"),
+          },
+          {
+            date: new Date("1919"),
+          },
+          {
+            date: new Date("1911"),
+          },
+        ],
+        (d) => +d / 100000000000,
+        5
+      )
+    ).toEqual(2);
+
+    expect(
+      getMaxOverlappingEvents(
+        [
+          {
+            date: new Date("1991"),
+          },
+          {
+            date: new Date("1992"),
+          },
+          {
+            date: new Date("1997"),
+          },
+          {
+            date: new Date("1919"),
+          },
+          {
+            date: new Date("1911"),
+          },
+          {
+            date: new Date("1901"),
+          },
+          {
+            date: new Date("1916"),
+          },
+          {
+            date: new Date("1945"),
+          },
+        ],
+        (d) => +d / 100000000000,
+        50
+      )
+    ).toEqual(7);
+
+    expect(
+      getMaxOverlappingEvents(
+        [
+          {
+            date: new Date("1991"),
+          },
+          {
+            date: new Date("1992"),
+          },
+          {
+            date: new Date("1997"),
+          },
+          {
+            date: new Date("1919"),
+          },
+          {
+            date: new Date("1911"),
+          },
+          {
+            date: new Date("1901"),
+          },
+          {
+            date: new Date("1916"),
+          },
+          {
+            date: new Date("1945"),
+          },
+        ],
+        (d) => +d / 100000000000,
+        2
+      )
+    ).toEqual(2);
+
+    expect(
+      getMaxOverlappingEvents(
+        [
+          {
+            date: new Date("1991"),
+          },
+        ],
+        (d) => +d / 100000000000,
+        50000000
+      )
+    ).toEqual(0);
+
+    expect(getMaxOverlappingEvents([], (d) => +d, 50000000)).toEqual(0);
   });
 });

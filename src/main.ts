@@ -12,7 +12,7 @@ import {
   ProcessedSpanEvent,
   SpanEvent,
 } from "./types";
-import pointEventElement from "./elements/pointEventElement";
+import { pointEventContent, TOPIC_COLORS } from "./elements/pointEvent";
 import spanEventElement from "./elements/spanEventElement";
 import tooltip from "./elements/tooltip";
 
@@ -37,7 +37,7 @@ function processEvents(
 const axisSpanEventsGap = 50;
 const spanEventMargin = 20;
 const width = 1000;
-const height = 600;
+const height = 800;
 const pointEventRadius = 8;
 
 function createTimeline(events: (SpanEvent | PointEvent)[]) {
@@ -68,10 +68,14 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
   const domain = getDomainWithPadding(minDate, maxDate, 0.05);
 
   const scaleX = d3.scaleUtc().domain(domain).range([0, width]);
+  const originalScale = scaleX.copy();
   const axisHeight =
     getMaxOverlappingEvents(pointEvents, scaleX, pointEventRadius) * 20 + 100;
 
-  const spanEventHeight = height - axisHeight - axisSpanEventsGap;
+  const spanEventHeight = Math.min(
+    height - axisHeight - axisSpanEventsGap,
+    500
+  );
 
   const axis = d3.axisTop(scaleX).tickSize(axisHeight - 20);
 
@@ -114,11 +118,9 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
     const curDomain = scaleX.domain();
     const curDomainLength = +curDomain[1] - +curDomain[0];
     const diff = (e.dx * curDomainLength) / 1000;
-    // console.log(diff);
     if (e.dx < 0) {
       const newEnd = Math.min(+curDomain[1] - diff, +maxDragDomain[1]);
       const newStart = +curDomain[0] + (newEnd - +curDomain[1]);
-      console.log(newStart, newEnd);
       updateScale(
         [new Date(newStart), new Date(newEnd)],
         d3.transition("dragScale").duration(0)
@@ -126,7 +128,6 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
     } else {
       const newStart = Math.max(+curDomain[0] - diff, +maxDragDomain[0]);
       const newEnd = +curDomain[1] + (newStart - +curDomain[0]);
-      console.log(newStart, newEnd);
       updateScale(
         [new Date(newStart), new Date(newEnd)],
         d3.transition("dragScale").duration(0)
@@ -175,6 +176,21 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
         transition,
       });
     });
+
+    d3.selectAll(".pointEvent")
+      .transition(transition)
+      .attr("cx", (d: any) => scaleX(d.date));
+
+    if (activePointEvent) {
+      pointEventContentElement
+        .transition(transition)
+        .attr("x", getPointEventContentX(activePointEvent));
+
+      pointEventConnection
+        .transition(transition)
+        .attr("x1", scaleX(activePointEvent.date))
+        .attr("x2", getPointEventContentX(activePointEvent) + 200);
+    }
   };
 
   const setSelectedSpanEvent = (event: ProcessedSpanEvent | undefined) => {
@@ -368,16 +384,14 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
     })
     .classed("spanEventDateLine", true);
 
-  const domainMid = +domain[0] + (+domain[1] - +domain[0]) / 2;
-
   const getPointEventY = (event: ProcessedPointEvent) => {
-    const eventX = scaleX(event.date);
+    const eventX = originalScale(event.date);
     let overlappingEvents = 0;
     for (let e of pointEvents) {
       if (e === event) {
         break;
       }
-      const eX = scaleX(e.date);
+      const eX = originalScale(e.date);
       if (Math.abs(eventX - eX) < pointEventRadius * 2) {
         overlappingEvents++;
       }
@@ -387,70 +401,84 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
 
   let activePointEvent: ProcessedPointEvent | undefined = undefined;
   let isZoomedIn = false;
+
+  const getPointEventContentX = (d: ProcessedPointEvent) =>
+    Math.max(0, Math.min(scaleX(d.date) - 200, width - 400));
+
+  const pointEventConnection = svg
+    .append("line")
+    .attr("stroke-width", 3)
+    .style("opacity", 0);
+
   svg
     .selectAll(".pointEvent")
     .data(pointEvents)
     .enter()
-    .append((d) =>
-      pointEventElement(d, {
-        alignInfoBox: +d.date > domainMid ? "right" : "left",
-        circleRadius: pointEventRadius,
+    .append("circle")
+    .attr("cx", (d) => scaleX(d.date))
+    .attr("cy", (d) => 50 + getPointEventY(d))
+    .attr("r", 8)
+    .attr("fill", (d) => TOPIC_COLORS[d.topic])
+    .style("cursor", "pointer")
+    .classed("pointEvent", true)
+    .on("mouseover", function () {
+      d3.select(this).transition().attr("r", 12);
+    })
+    .on("mouseleave", function () {
+      d3.select(this).transition().attr("r", 8);
+    })
+    .on("click", function (_, d) {
+      const t: any = d3
+        .transition()
+        .ease(d3.easeExpOut)
+        .duration(activePointEvent ? 500 : 0);
+      activePointEvent = d;
+      pointEventContentElement.node()?.setEvent(d);
+
+      pointEventContentElement
+        .transition(t)
+        .attr("x", getPointEventContentX(d))
+        .attr("visibility", "visible");
+
+      pointEventConnection
+        .transition(t)
+        .style("opacity", 1)
+        .attr("x1", scaleX(d.date))
+        .attr("y1", 50 + getPointEventY(d))
+        .attr("x2", getPointEventContentX(d) + 200)
+        .attr("y2", "110")
+        .attr("stroke", TOPIC_COLORS[d.topic]);
+    });
+
+  const pointEventContentElement = svg
+    .append(() =>
+      pointEventContent({
         onImageClick: () => {
           isZoomedIn = true;
-          const currentDomain = scaleX.domain();
-          const currentDomainMid =
-            +currentDomain[0] + (+currentDomain[1] - +currentDomain[0]) / 2;
-          const alignment = +d.date > currentDomainMid ? "left" : "right";
           svg
             .transition()
             .duration(1000)
             .attr(
               "viewBox",
-              `${scaleX(d.date) - (alignment === "right" ? 55 : 455)} ${
-                getPointEventY(d) + 20
-              } 500 350`
+              `${getPointEventContentX(activePointEvent!) - 50} 80 500 400`
             );
         },
         onCompressClick: () => {
-          isZoomedIn = false;
-          svg
-            .transition()
-            .duration(1000)
-            .attr("viewBox", `0 0 ${width} ${height}`);
+          if (isZoomedIn) {
+            svg
+              .transition()
+              .duration(1000)
+              .attr("viewBox", `0 0 ${width} ${height}`);
+            isZoomedIn = false;
+          } else {
+            pointEventContentElement.attr("visibility", "hidden");
+            pointEventConnection.style("opacity", 0);
+          }
         },
       })
     )
-    .attr(
-      "x",
-      (d) => scaleX(d.date) - pointEventRadius - (+d.date > domainMid ? 400 : 0)
-    )
-    .attr("y", (d) => 60 - getPointEventY(d))
-    .on("mouseover", function (_, d) {
-      if (activePointEvent) {
-        return;
-      }
-      activePointEvent = d;
-      d3.selectAll(".pointEvent").sort((a, _) => (a === d ? 1 : -1));
-
-      d3.select(`#circleClipPath_${d.id} circle`)
-        .transition(`PointEventInfo_${d.id}`)
-        .duration(500)
-        .ease(d3.easePolyIn)
-        .attr("r", 1000);
-    })
-    .on("mouseleave", function (_, d) {
-      if (isZoomedIn) {
-        return;
-      }
-      if (activePointEvent === d) {
-        activePointEvent = undefined;
-      }
-      d3.select(`#circleClipPath_${d.id} circle`)
-        .transition(`PointEventInfo_${d.id}`)
-        .duration(500)
-        .ease(d3.easePolyOut)
-        .attr("r", pointEventRadius);
-    });
+    .attr("y", 100)
+    .attr("visibility", "hidden");
 
   return svg.node()!;
 }

@@ -105,7 +105,77 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
     .attr("fill", "#fff")
     .attr("stroke-width", 2)
     .style("font-size", 18)
-    // .style("font-family", "FiraCode");
+    .style("font-family", "FiraCode")
+    .style("cursor", "grab");
+
+  const dragHandler = d3.drag();
+  const maxDragDomain = getDomainWithPadding(domain[0], domain[1], 0.2);
+  dragHandler.on("drag", (e) => {
+    const curDomain = scaleX.domain();
+    const curDomainLength = +curDomain[1] - +curDomain[0];
+    const diff = (e.dx * curDomainLength) / 1000;
+    // console.log(diff);
+    if (e.dx < 0) {
+      const newEnd = Math.min(+curDomain[1] - diff, +maxDragDomain[1]);
+      const newStart = +curDomain[0] + (newEnd - +curDomain[1]);
+      console.log(newStart, newEnd);
+      updateScale(
+        [new Date(newStart), new Date(newEnd)],
+        d3.transition("dragScale").duration(0)
+      );
+    } else {
+      const newStart = Math.max(+curDomain[0] - diff, +maxDragDomain[0]);
+      const newEnd = +curDomain[1] + (newStart - +curDomain[0]);
+      console.log(newStart, newEnd);
+      updateScale(
+        [new Date(newStart), new Date(newEnd)],
+        d3.transition("dragScale").duration(0)
+      );
+    }
+  });
+  dragHandler(axisGroup as any);
+
+  const updateScale = (newDomain: [Date, Date], transition: any) => {
+    scaleX.domain(newDomain);
+    const newDomainMid = +newDomain[0] + (+newDomain[1] - +newDomain[0]) / 2;
+
+    axisGroup
+      .transition(transition)
+      .call(d3.axisTop(scaleX).tickSize(axisHeight - 20));
+
+    d3.selectAll<SVGElement, ProcessedPointEvent>(".pointEvent")
+      .transition(transition)
+      .attr(
+        "x",
+        (d) =>
+          scaleX(d.date) - pointEventRadius - (+d.date > newDomainMid ? 400 : 0)
+      )
+      .select("clipPath circle")
+      .attr("cx", (d) => {
+        return +d.date > newDomainMid
+          ? 400 - pointEventRadius
+          : pointEventRadius;
+      });
+
+    d3.selectAll<SVGElement, ProcessedSpanEvent>(".spanEvent")
+      .transition(transition)
+      .attr("x", (d, i) =>
+        selectedSpanEvent ? scaleX(d.start) : getSpanEventX(i)
+      )
+      .attr("width", (d) =>
+        selectedSpanEvent ? scaleX(d.end) - scaleX(d.start) : spanEventWidth
+      );
+
+    d3.selectAll(".spanEventDateLine").each(function (d: any, i) {
+      d3.select(this).property("updateScale")({
+        startSpanX: selectedSpanEvent ? scaleX(d.start) : getSpanEventX(i),
+        startRealX: scaleX(d.start),
+        endSpanX: selectedSpanEvent ? scaleX(d.end) : getSpanEventX(i + 1),
+        endRealX: scaleX(d.end),
+        transition,
+      });
+    });
+  };
 
   const setSelectedSpanEvent = (event: ProcessedSpanEvent | undefined) => {
     const newDomain = getDomainWithPadding(
@@ -114,55 +184,20 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
       event ? 0.5 : 0.05
     );
 
-    scaleX.domain(newDomain);
-
     const transition: any = d3
       .transition("setSelectedSpanEvent")
       .duration(1000)
       .ease(d3.easePolyInOut);
 
-    const eventDomainMid = +newDomain[0] + (+newDomain[1] - +newDomain[0]) / 2;
-
-    axisGroup.transition(transition).call(d3.axisTop(scaleX).tickSize(axisHeight - 20));
-
-    d3.selectAll<SVGElement, ProcessedPointEvent>(".pointEvent")
-      .transition(transition)
-      .attr(
-        "x",
-        (d) =>
-          scaleX(d.date) -
-          pointEventRadius -
-          (+d.date > eventDomainMid ? 400 : 0)
-      )
-      .select("clipPath circle")
-      .attr("cx", (d) => {
-        return +d.date > eventDomainMid
-          ? 400 - pointEventRadius
-          : pointEventRadius;
-      });
-
-    d3.selectAll(".spanEventDateLine").each(function (d: any, i) {
-      d3.select(this).property("updateScale")(
-        event ? scaleX(d.start) : getSpanEventX(i),
-        scaleX(d.start),
-        event ? scaleX(d.end) : getSpanEventX(i + 1),
-        scaleX(d.end),
-        transition
-      );
-    });
+    const previousSpanEvent = selectedSpanEvent;
+    selectedSpanEvent = event;
+    updateScale(newDomain, transition);
 
     const spanEvents = d3.selectAll<SVGElement, ProcessedSpanEvent>(
       ".spanEvent"
     );
 
     spanEvents.style("cursor", (d) => (d === event ? "default" : "pointer"));
-
-    spanEvents
-      .transition(transition)
-      .attr("x", (d, i) => (event ? scaleX(d.start) : getSpanEventX(i)))
-      .attr("width", (d) =>
-        event ? scaleX(d.end) - scaleX(d.start) : spanEventWidth
-      );
 
     const thisSpanEvent = spanEvents.filter((d) => d === event);
 
@@ -176,28 +211,26 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
 
     thisSpanEvent.select(".contentGradient").attr("fill", "transparent");
 
-    if (selectedSpanEvent && selectedSpanEvent !== event) {
-      const previousSelectedEvent = spanEvents.filter(
-        (d) => d === selectedSpanEvent
+    if (previousSpanEvent && previousSpanEvent !== event) {
+      const previousSelectedEventElement = spanEvents.filter(
+        (d) => d === previousSpanEvent
       );
 
-      previousSelectedEvent
+      previousSelectedEventElement
         .select("image")
         .transition(transition)
         .attr("height", "80%");
 
-      previousSelectedEvent
+      previousSelectedEventElement
         .select(".content")
         .transition(transition)
         .attr("height", "20%")
         .attr("y", "80%");
 
-      previousSelectedEvent
+      previousSelectedEventElement
         .select(".contentGradient")
         .attr("fill", "url(#grayTransparentGradient)");
     }
-
-    selectedSpanEvent = event;
   };
 
   svg
@@ -258,9 +291,7 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
           "points",
           `${getSpanEventX(
             i
-          )},${y2} ${startX},${y1} ${endX},${y1} ${getSpanEventX(
-            i + 1
-          )}, ${y2}}`
+          )},${y2} ${startX},${y1} ${endX},${y1} ${getSpanEventX(i + 1)}, ${y2}`
         )
         .attr("stroke", "#000")
         .attr("stroke-width", 1)
@@ -298,18 +329,24 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
       const node = group.node();
 
       return Object.assign(node, {
-        updateScale: (
-          startSpanX: number,
-          startRealX: number,
-          endSpanX: number,
-          endRealX: number,
-          transition: any
-        ) => {
+        updateScale: ({
+          startSpanX = getSpanEventX(i),
+          startRealX,
+          endSpanX = getSpanEventX(i + 1),
+          endRealX,
+          transition,
+        }: {
+          startSpanX?: number;
+          startRealX: number;
+          endSpanX?: number;
+          endRealX: number;
+          transition: any;
+        }) => {
           path
             .transition(transition)
             .attr(
               "points",
-              `${startSpanX},${y2} ${startRealX},${y1} ${endRealX},${y1} ${endSpanX}, ${y2}}`
+              `${startSpanX},${y2} ${startRealX},${y1} ${endRealX},${y1} ${endSpanX}, ${y2}`
             );
 
           startCircle.transition(transition).attr("cx", startRealX);

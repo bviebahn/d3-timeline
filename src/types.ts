@@ -10,9 +10,9 @@ export type SpanEvent = BaseEvent & {
   end: string | undefined;
 };
 
-export type PointEvent = BaseEvent & {
+export type PointEvent<T extends string> = BaseEvent & {
   date: string;
-  topic: "Ort" | "Produktion" | "Menschen";
+  topic: T;
 };
 
 export type ProcessedSpanEvent = Omit<SpanEvent, "start" | "end"> & {
@@ -20,11 +20,13 @@ export type ProcessedSpanEvent = Omit<SpanEvent, "start" | "end"> & {
   end: Date;
 };
 
-export type ProcessedPointEvent = Omit<PointEvent, "date"> & {
+export type ProcessedPointEvent<T extends string = string> = Omit<PointEvent<T>, "date"> & {
   date: Date;
+  yLevel: number;
 };
 
-export type TimelineInput = {
+export type TimelineInput<T extends string = string> = {
   title: string;
-  events: (SpanEvent | PointEvent)[];
+  topicColors: Record<T, string>
+  events: (SpanEvent | PointEvent<T>)[];
 };

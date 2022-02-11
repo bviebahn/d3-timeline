@@ -1,6 +1,5 @@
 import "./style.css";
 import * as d3 from "d3";
-import data from "./data";
 import {
   getDomainWithPadding,
   getMaxOverlappingEvents,
@@ -13,26 +12,33 @@ import {
   SpanEvent,
   TimelineInput,
 } from "./types";
-import { pointEventContent, TOPIC_COLORS } from "./elements/pointEvent";
+import { pointEventContent } from "./elements/pointEvent";
 import spanEventElement from "./elements/spanEventElement";
 import tooltip from "./elements/tooltip";
 
 function processEvents(
-  events: (SpanEvent | PointEvent)[]
+  events: (SpanEvent | PointEvent<string>)[]
 ): (ProcessedSpanEvent | ProcessedPointEvent)[] {
-  return events.map((e) => {
-    if ("date" in e) {
+  return events
+    .map((e) => {
+      if ("date" in e) {
+        return {
+          ...e,
+          date: new Date(e.date),
+          yLevel: 0,
+        };
+      }
       return {
         ...e,
-        date: new Date(e.date),
+        start: new Date(e.start),
+        end: e.end ? new Date(e.end) : new Date(),
       };
-    }
-    return {
-      ...e,
-      start: new Date(e.start),
-      end: e.end ? new Date(e.end) : new Date(),
-    };
-  });
+    })
+    .sort((a, b) => {
+      const aDate = "date" in a ? a.date : a.start;
+      const bDate = "date" in b ? b.date : b.start;
+      return +aDate - +bDate;
+    });
 }
 
 const axisSpanEventsGap = 50;
@@ -43,7 +49,7 @@ const pointEventRadius = 8;
 const titleHeight = 50;
 
 function createTimeline(input: TimelineInput) {
-  const { title, events } = input;
+  const { title, events, topicColors } = input;
   let selectedSpanEvent: ProcessedSpanEvent | undefined;
   const processedEvents = processEvents(events);
   const [spanEvents, pointEvents] = processedEvents.reduce(
@@ -71,6 +77,29 @@ function createTimeline(input: TimelineInput) {
   const domain = getDomainWithPadding(minDate, maxDate, 0.05);
 
   const scaleX = d3.scaleUtc().domain(domain).range([0, width]);
+
+  for (let p1 of pointEvents) {
+    for (let i = 0; i < 10; i++) {
+      p1.yLevel = i;
+      let hasCollision = false;
+      for (let p2 of pointEvents) {
+        if(p1 === p2) {
+          continue;
+        }
+        if (
+          p1.yLevel === p2.yLevel &&
+          Math.abs(scaleX(p1.date) - scaleX(p2.date)) < pointEventRadius * 2
+        ) {
+          hasCollision = true;
+          break;
+        }
+      }
+      if (!hasCollision) {
+        break;
+      }
+    }
+  }
+
   const originalScale = scaleX.copy();
   const axisHeight =
     getMaxOverlappingEvents(pointEvents, scaleX, pointEventRadius) * 20 + 100;
@@ -123,7 +152,7 @@ function createTimeline(input: TimelineInput) {
     .attr("stroke-width", 2)
     .style("font-size", 18)
     .style("font-family", "FiraCode")
-    .style("cursor", "grab")
+    .style("cursor", "grab");
 
   const dragHandler = d3.drag();
   const maxDragDomain = getDomainWithPadding(domain[0], domain[1], 0.2);
@@ -148,8 +177,8 @@ function createTimeline(input: TimelineInput) {
     }
   });
 
-  dragHandler.on("start", () => axisGroup.style("cursor", "grabbing"))
-  dragHandler.on("end", () => axisGroup.style("cursor", "grab"))
+  dragHandler.on("start", () => axisGroup.style("cursor", "grabbing"));
+  dragHandler.on("end", () => axisGroup.style("cursor", "grab"));
 
   dragHandler(axisGroup as any);
 
@@ -411,21 +440,6 @@ function createTimeline(input: TimelineInput) {
     })
     .classed("spanEventDateLine", true);
 
-  const getPointEventY = (event: ProcessedPointEvent) => {
-    const eventX = originalScale(event.date);
-    let overlappingEvents = 0;
-    for (let e of pointEvents) {
-      if (e === event) {
-        break;
-      }
-      const eX = originalScale(e.date);
-      if (Math.abs(eventX - eX) < pointEventRadius * 2) {
-        overlappingEvents++;
-      }
-    }
-    return overlappingEvents * 20;
-  };
-
   let activePointEvent: ProcessedPointEvent | undefined = undefined;
   let isZoomedIn = false;
 
@@ -443,9 +457,9 @@ function createTimeline(input: TimelineInput) {
     .enter()
     .append("circle")
     .attr("cx", (d) => scaleX(d.date))
-    .attr("cy", (d) => titleHeight + 50 + getPointEventY(d))
+    .attr("cy", (d) => titleHeight + 50 + d.yLevel * 20)
     .attr("r", 8)
-    .attr("fill", (d) => TOPIC_COLORS[d.topic])
+    .attr("fill", (d) => topicColors[d.topic])
     .style("cursor", "pointer")
     .classed("pointEvent", true)
     .on("mouseover", function () {
@@ -471,15 +485,16 @@ function createTimeline(input: TimelineInput) {
         .transition(t)
         .style("opacity", 1)
         .attr("x1", scaleX(d.date))
-        .attr("y1", titleHeight + 50 + getPointEventY(d))
+        .attr("y1", titleHeight + 50 + d.yLevel * 20)
         .attr("x2", getPointEventContentX(d) + 200)
         .attr("y2", axisHeight + titleHeight)
-        .attr("stroke", TOPIC_COLORS[d.topic]);
+        .attr("stroke", topicColors[d.topic]);
     });
 
   const pointEventContentElement = svg
     .append(() =>
       pointEventContent({
+        topicColors,
         onImageClick: () => {
           isZoomedIn = true;
           svg
@@ -487,7 +502,7 @@ function createTimeline(input: TimelineInput) {
             .duration(1000)
             .attr(
               "viewBox",
-              `${getPointEventContentX(activePointEvent!) - 50} 150 500 400`
+              `${getPointEventContentX(activePointEvent!) - 50} ${axisHeight + titleHeight - 20} 500 400`
             );
         },
         onCompressClick: () => {
@@ -511,4 +526,4 @@ function createTimeline(input: TimelineInput) {
   return svg.node()!;
 }
 
-document.getElementById("app")?.appendChild(createTimeline(data));
+export default createTimeline;

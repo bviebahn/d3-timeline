@@ -4,16 +4,12 @@ import { ProcessedPointEvent } from "../types";
 import { splitText } from "../utils";
 import compressIcon from "./compressIcon";
 
-export const TOPIC_COLORS = {
-  Menschen: "#FF5F00",
-  Ort: "#76B900",
-  Produktion: "#0082D1",
-};
-
 export function pointEventContent({
+  topicColors,
   onImageClick,
   onCompressClick,
 }: {
+  topicColors: Record<string, string>
   onImageClick: () => void;
   onCompressClick: () => void;
 }) {
@@ -96,7 +92,7 @@ export function pointEventContent({
 
   return Object.assign(eventElement.node(), {
     setEvent: (event: ProcessedPointEvent) => {
-      topicHeader.transition().attr("fill", TOPIC_COLORS[event.topic]);
+      topicHeader.transition().attr("fill", topicColors[event.topic]);
       headerText.text(event.topic);
       blurImage
         .attr("href", event.image)

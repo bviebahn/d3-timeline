@@ -96,7 +96,7 @@ export function pointEventContent({
 
   return Object.assign(eventElement.node(), {
     setEvent: (event: ProcessedPointEvent) => {
-      topicHeader.attr("fill", TOPIC_COLORS[event.topic]);
+      topicHeader.transition().attr("fill", TOPIC_COLORS[event.topic]);
       headerText.text(event.topic);
       blurImage
         .attr("href", event.image)

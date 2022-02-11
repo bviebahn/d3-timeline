@@ -136,6 +136,29 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
   });
   dragHandler(axisGroup as any);
 
+  svg.on("mousewheel", (e) => {
+    const maxDomain = originalScale.domain();
+    const curDomain = scaleX.domain();
+    const diff = e.deltaY * 100000000;
+    const newStart = Math.max(+curDomain[0] - diff, +maxDomain[0]);
+    const newEnd = Math.min(+curDomain[1] + diff, +maxDomain[1]);
+    if (
+      selectedSpanEvent &&
+      newStart === +maxDomain[0] &&
+      newEnd === +maxDomain[1]
+    ) {
+      setSelectedSpanEvent(undefined);
+    } else if (
+      newStart < newEnd &&
+      (newStart !== +curDomain[0] || newEnd !== +curDomain[1])
+    ) {
+      updateScale(
+        [new Date(newStart), new Date(newEnd)],
+        d3.transition("zoom").duration(0)
+      );
+    }
+  });
+
   const updateScale = (newDomain: [Date, Date], transition: any) => {
     scaleX.domain(newDomain);
     const newDomainMid = +newDomain[0] + (+newDomain[1] - +newDomain[0]) / 2;
@@ -333,14 +356,16 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
         .attr("x", startX - 40)
         .attr("y", axisHeight - 35)
         .style("opacity", 0)
-        .classed("tooltip", true);
+        .classed("tooltip", true)
+        .attr("pointer-events", "none");
 
       const endTooltip = group
         .append(() => tooltip(`${event.end.getFullYear()}`))
         .attr("x", endX - 40)
         .attr("y", axisHeight - 35)
         .style("opacity", 0)
-        .classed("tooltip", true);
+        .classed("tooltip", true)
+        .attr("pointer-events", "none");
 
       const node = group.node();
 
@@ -422,7 +447,7 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
     .style("cursor", "pointer")
     .classed("pointEvent", true)
     .on("mouseover", function () {
-      d3.select(this).transition().attr("r", 12);
+      d3.select(this).transition().attr("r", 10);
     })
     .on("mouseleave", function () {
       d3.select(this).transition().attr("r", 8);
@@ -473,6 +498,7 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
           } else {
             pointEventContentElement.attr("visibility", "hidden");
             pointEventConnection.style("opacity", 0);
+            activePointEvent = undefined;
           }
         },
       })

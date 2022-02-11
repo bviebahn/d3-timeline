@@ -82,9 +82,7 @@ function createTimeline(input: TimelineInput) {
 
   const axis = d3.axisTop(scaleX).tickSize(axisHeight - 20);
 
-  const svg = d3
-    .create("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`);
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${width} ${height}`);
   svg
     .append("text")
     .text(title)
@@ -125,7 +123,7 @@ function createTimeline(input: TimelineInput) {
     .attr("stroke-width", 2)
     .style("font-size", 18)
     .style("font-family", "FiraCode")
-    .style("cursor", "grab");
+    .style("cursor", "grab")
 
   const dragHandler = d3.drag();
   const maxDragDomain = getDomainWithPadding(domain[0], domain[1], 0.2);
@@ -149,6 +147,10 @@ function createTimeline(input: TimelineInput) {
       );
     }
   });
+
+  dragHandler.on("start", () => axisGroup.style("cursor", "grabbing"))
+  dragHandler.on("end", () => axisGroup.style("cursor", "grab"))
+
   dragHandler(axisGroup as any);
 
   svg.on("mousewheel", (e) => {
@@ -176,25 +178,10 @@ function createTimeline(input: TimelineInput) {
 
   const updateScale = (newDomain: [Date, Date], transition: any) => {
     scaleX.domain(newDomain);
-    const newDomainMid = +newDomain[0] + (+newDomain[1] - +newDomain[0]) / 2;
 
     axisGroup
       .transition(transition)
       .call(d3.axisTop(scaleX).tickSize(axisHeight - 20));
-
-    d3.selectAll<SVGElement, ProcessedPointEvent>(".pointEvent")
-      .transition(transition)
-      .attr(
-        "x",
-        (d) =>
-          scaleX(d.date) - pointEventRadius - (+d.date > newDomainMid ? 400 : 0)
-      )
-      .select("clipPath circle")
-      .attr("cx", (d) => {
-        return +d.date > newDomainMid
-          ? 400 - pointEventRadius
-          : pointEventRadius;
-      });
 
     d3.selectAll<SVGElement, ProcessedSpanEvent>(".spanEvent")
       .transition(transition)

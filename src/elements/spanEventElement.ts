@@ -63,7 +63,7 @@ function spanEventElement(
   contentElement
     .append("rect")
     .classed("contentGradient", true)
-    .attr("width", "100%")
+    .attr("width", 500)
     .attr("height", "100%")
     .attr("fill", "url(#grayTransparentGradient)")
     .attr("pointer-events", "none");

@@ -83,9 +83,13 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
 
   const grayTransparentGradient = svg
     .append("svg:defs")
-    .append("svg:linearGradient")
+    .append("svg:radialGradient")
     .attr("id", "grayTransparentGradient")
-    .attr("gradientTransform", "rotate(90)");
+    .attr("cx", 0)
+    .attr("cy", 0)
+    .attr("r", 1)
+    .attr("fx", 0.1)
+    .attr("fy", 0.1);
 
   grayTransparentGradient
     .append("svg:stop")

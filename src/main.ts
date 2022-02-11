@@ -40,6 +40,7 @@ const spanEventMargin = 20;
 const width = 1000;
 const height = 800;
 const pointEventRadius = 8;
+const titleHeight = 50;
 
 function createTimeline(input: TimelineInput) {
   const { title, events } = input;
@@ -75,18 +76,20 @@ function createTimeline(input: TimelineInput) {
     getMaxOverlappingEvents(pointEvents, scaleX, pointEventRadius) * 20 + 100;
 
   const spanEventHeight = Math.min(
-    height - axisHeight - axisSpanEventsGap,
+    height - axisHeight - axisSpanEventsGap - titleHeight,
     500
   );
 
   const axis = d3.axisTop(scaleX).tickSize(axisHeight - 20);
 
-  const svg = d3.create("svg").attr("viewBox", `0 -60 ${width} ${height}`);
+  const svg = d3
+    .create("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`);
   svg
     .append("text")
     .text(title)
     .attr("x", width / 2 - (title.length * 13) / 2)
-    .attr("y", -20)
+    .attr("y", 30)
     .attr("font-size", 24);
 
   const grayTransparentGradient = svg
@@ -117,7 +120,7 @@ function createTimeline(input: TimelineInput) {
   const axisGroup = svg
     .append("g")
     .call(axis)
-    .attr("transform", `translate(0, ${axisHeight})`)
+    .attr("transform", `translate(0, ${axisHeight + titleHeight})`)
     .attr("fill", "#fff")
     .attr("stroke-width", 2)
     .style("font-size", 18)
@@ -297,7 +300,7 @@ function createTimeline(input: TimelineInput) {
     )
     .classed("spanEvent", true)
     .attr("x", (_, i) => getSpanEventX(i))
-    .attr("y", axisHeight + axisSpanEventsGap)
+    .attr("y", axisHeight + axisSpanEventsGap + titleHeight)
     .attr("width", spanEventWidth)
     .attr("height", spanEventHeight)
     .style("cursor", "pointer")
@@ -333,8 +336,8 @@ function createTimeline(input: TimelineInput) {
       const endX = scaleX(event.end);
       const group = d3.create("svg:g");
 
-      const y1 = axisHeight;
-      const y2 = axisHeight + axisSpanEventsGap;
+      const y1 = axisHeight + titleHeight;
+      const y2 = y1 + axisSpanEventsGap;
 
       const path = group
         .append("svg:polygon")
@@ -352,21 +355,21 @@ function createTimeline(input: TimelineInput) {
       const startCircle = group
         .append("circle")
         .attr("cx", startX)
-        .attr("cy", axisHeight)
+        .attr("cy", axisHeight + titleHeight)
         .attr("r", 6)
         .attr("fill", "#414141");
 
       const endCircle = group
         .append("circle")
         .attr("cx", endX)
-        .attr("cy", axisHeight)
+        .attr("cy", axisHeight + titleHeight)
         .attr("r", 6)
         .attr("fill", "#414141");
 
       const startTooltip = group
         .append(() => tooltip(`${event.start.getFullYear()}`))
         .attr("x", startX - 40)
-        .attr("y", axisHeight - 35)
+        .attr("y", axisHeight + titleHeight - 35)
         .style("opacity", 0)
         .classed("tooltip", true)
         .attr("pointer-events", "none");
@@ -374,7 +377,7 @@ function createTimeline(input: TimelineInput) {
       const endTooltip = group
         .append(() => tooltip(`${event.end.getFullYear()}`))
         .attr("x", endX - 40)
-        .attr("y", axisHeight - 35)
+        .attr("y", axisHeight + titleHeight - 35)
         .style("opacity", 0)
         .classed("tooltip", true)
         .attr("pointer-events", "none");
@@ -453,7 +456,7 @@ function createTimeline(input: TimelineInput) {
     .enter()
     .append("circle")
     .attr("cx", (d) => scaleX(d.date))
-    .attr("cy", (d) => 50 + getPointEventY(d))
+    .attr("cy", (d) => titleHeight + 50 + getPointEventY(d))
     .attr("r", 8)
     .attr("fill", (d) => TOPIC_COLORS[d.topic])
     .style("cursor", "pointer")
@@ -481,9 +484,9 @@ function createTimeline(input: TimelineInput) {
         .transition(t)
         .style("opacity", 1)
         .attr("x1", scaleX(d.date))
-        .attr("y1", 50 + getPointEventY(d))
+        .attr("y1", titleHeight + 50 + getPointEventY(d))
         .attr("x2", getPointEventContentX(d) + 200)
-        .attr("y2", "110")
+        .attr("y2", axisHeight + titleHeight)
         .attr("stroke", TOPIC_COLORS[d.topic]);
     });
 
@@ -497,7 +500,7 @@ function createTimeline(input: TimelineInput) {
             .duration(1000)
             .attr(
               "viewBox",
-              `${getPointEventContentX(activePointEvent!) - 50} 80 500 400`
+              `${getPointEventContentX(activePointEvent!) - 50} 150 500 400`
             );
         },
         onCompressClick: () => {
@@ -515,7 +518,7 @@ function createTimeline(input: TimelineInput) {
         },
       })
     )
-    .attr("y", 100)
+    .attr("y", axisHeight + titleHeight)
     .attr("visibility", "hidden");
 
   return svg.node()!;

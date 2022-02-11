@@ -15,14 +15,16 @@ export type PointEvent = BaseEvent & {
   topic: "Ort" | "Produktion" | "Menschen";
 };
 
-export type ProcessedSpanEvent = Omit<
-  SpanEvent,
-  "start" | "end"
-> & {
+export type ProcessedSpanEvent = Omit<SpanEvent, "start" | "end"> & {
   start: Date;
   end: Date;
 };
 
 export type ProcessedPointEvent = Omit<PointEvent, "date"> & {
   date: Date;
+};
+
+export type TimelineInput = {
+  title: string;
+  events: (SpanEvent | PointEvent)[];
 };

@@ -1,6 +1,6 @@
 import "./style.css";
 import * as d3 from "d3";
-import mockData from "./data";
+import data from "./data";
 import {
   getDomainWithPadding,
   getMaxOverlappingEvents,
@@ -11,6 +11,7 @@ import {
   ProcessedPointEvent,
   ProcessedSpanEvent,
   SpanEvent,
+  TimelineInput,
 } from "./types";
 import { pointEventContent, TOPIC_COLORS } from "./elements/pointEvent";
 import spanEventElement from "./elements/spanEventElement";
@@ -40,7 +41,8 @@ const width = 1000;
 const height = 800;
 const pointEventRadius = 8;
 
-function createTimeline(events: (SpanEvent | PointEvent)[]) {
+function createTimeline(input: TimelineInput) {
+  const { title, events } = input;
   let selectedSpanEvent: ProcessedSpanEvent | undefined;
   const processedEvents = processEvents(events);
   const [spanEvents, pointEvents] = processedEvents.reduce(
@@ -79,7 +81,13 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
 
   const axis = d3.axisTop(scaleX).tickSize(axisHeight - 20);
 
-  const svg = d3.create("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const svg = d3.create("svg").attr("viewBox", `0 -60 ${width} ${height}`);
+  svg
+    .append("text")
+    .text(title)
+    .attr("x", width / 2 - (title.length * 13) / 2)
+    .attr("y", -20)
+    .attr("font-size", 24);
 
   const grayTransparentGradient = svg
     .append("svg:defs")
@@ -513,4 +521,4 @@ function createTimeline(events: (SpanEvent | PointEvent)[]) {
   return svg.node()!;
 }
 
-document.getElementById("app")?.appendChild(createTimeline(mockData));
+document.getElementById("app")?.appendChild(createTimeline(data));

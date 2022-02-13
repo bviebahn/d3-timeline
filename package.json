@@ -6,7 +6,8 @@
     "build": "tsc && vite build && cp -r fonts dist/assets",
     "serve": "vite preview",
     "deploy": "npm run build && gh-pages -d dist",
-    "test": "jest"
+    "test": "jest",
+    "e2e:test": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.18.1",

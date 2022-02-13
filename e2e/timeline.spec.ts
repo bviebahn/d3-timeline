@@ -47,4 +47,32 @@ test.describe("Span events", () => {
     await page.waitForSelector(".tooltip >> text=1945");
     await page.waitForSelector(".tooltip >> text=1990");
   });
+
+  test("should be able to update domain by dragging", async ({ page }) => {
+    await page.waitForSelector(".axis");
+
+    await page.waitForSelector(".tick >> text=1900");
+    await page.waitForSelector(".tick >> text=2040", { state: "hidden" });
+
+    await page.locator(".axis").dragTo(page.locator(".axis"), {
+      sourcePosition: { x: 400, y: 50 },
+      targetPosition: { x: 200, y: 50 },
+    });
+
+    await page.waitForSelector(".tick >> text=1900", { state: "hidden" });
+    await page.waitForSelector(".tick >> text=2040");
+  });
+
+  test("should be able to update domain by scrolling", async ({ page }) => {
+    await page.waitForSelector(".axis");
+
+    await page.waitForSelector(".tick >> text=1900");
+    await page.waitForSelector(".tick >> text=2020");
+    await page.mouse.move(500, 100);
+    await page.mouse.wheel(0, -1000)
+    
+    await page.waitForSelector(".tick >> text=1950");
+    await page.waitForSelector(".tick >> text=1900", { state: "hidden" });
+    await page.waitForSelector(".tick >> text=2020", { state: "hidden" });
+  });
 });

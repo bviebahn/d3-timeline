@@ -1,5 +1,4 @@
 export type BaseEvent = {
-  id: string;
   title: string;
   text: string;
   image: string;
@@ -7,7 +6,7 @@ export type BaseEvent = {
 
 export type SpanEvent = BaseEvent & {
   start: string;
-  end: string | undefined;
+  end?: string;
 };
 
 export type PointEvent<T extends string> = BaseEvent & {

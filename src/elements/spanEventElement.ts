@@ -57,7 +57,7 @@ function spanEventElement(
     .text((d) => d)
     .attr("x", 10)
     .attr("y", (_, i) => 40 + i * 16)
-    .style("font-size", 12)
+    .style("font-size", "12px")
     .attr("fill", "#ccc");
 
   contentElement

@@ -123,7 +123,7 @@ export function pointEventContent({
         .attr("y", (_, i) => imageHeight + 50 + i * 20)
         .text((d) => d)
         .attr("fill", "#ccc")
-        .style("font-size", 16)
+        .style("font-size", "16px")
         .style("font-weight", "bold");
 
       eventElement
@@ -136,7 +136,7 @@ export function pointEventContent({
         .attr("y", (_, i) => imageHeight + 50 + titleLines.length * 20 + i * 16)
         .text((d) => d)
         .attr("fill", "#ccc")
-        .style("font-size", 12);
+        .style("font-size", "12px");
     },
   });
 }

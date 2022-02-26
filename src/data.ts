@@ -1,7 +1,7 @@
 import { TimelineInput } from "./types";
 
 export const testData: TimelineInput<"Menschen" | "Produktion" | "Ort"> = {
-  title: "Test",
+  title: "Zeitachse mit generierten Daten",
   topicColors: {
     Menschen: "#FF5F00",
     Ort: "#76B900",

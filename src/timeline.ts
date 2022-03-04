@@ -499,30 +499,36 @@ function createTimeline(input: TimelineInput) {
     .append(() =>
       pointEventContent({
         topicColors,
-        onImageClick: () => {
-          isZoomedIn = true;
-          svg
-            .transition()
-            .duration(1000)
-            .attr(
-              "viewBox",
-              `${getPointEventContentX(activePointEvent!) - 50} ${
-                axisHeight + titleHeight - 20
-              } 500 400`
-            );
+        onToggleZoom: () => {
+          if (isZoomedIn) {
+            svg
+              .transition()
+              .duration(1000)
+              .attr("viewBox", `0 0 ${width} ${height}`);
+          } else {
+            svg
+              .transition()
+              .duration(1000)
+              .attr(
+                "viewBox",
+                `${getPointEventContentX(activePointEvent!) - 50} ${
+                  axisHeight + titleHeight - 20
+                } 500 400`
+              );
+          }
+          isZoomedIn = !isZoomedIn;
         },
-        onCompressClick: () => {
+        onCloseClick: () => {
           if (isZoomedIn) {
             svg
               .transition()
               .duration(1000)
               .attr("viewBox", `0 0 ${width} ${height}`);
             isZoomedIn = false;
-          } else {
-            pointEventContentElement.attr("visibility", "hidden");
-            pointEventConnection.style("opacity", 0);
-            activePointEvent = undefined;
           }
+          pointEventContentElement.attr("visibility", "hidden");
+          pointEventConnection.style("opacity", 0);
+          activePointEvent = undefined;
         },
       })
     )

@@ -2,16 +2,17 @@ import * as d3 from "d3";
 
 import { ProcessedPointEvent } from "../types";
 import { splitText } from "../utils";
-import compressIcon from "./compressIcon";
+import closeIcon from "./closeIcon";
+import zoomIcon from "./zoomIcon";
 
 export function pointEventContent({
   topicColors,
-  onImageClick,
-  onCompressClick,
+  onToggleZoom,
+  onCloseClick,
 }: {
-  topicColors: Record<string, string>
-  onImageClick: () => void;
-  onCompressClick: () => void;
+  topicColors: Record<string, string>;
+  onToggleZoom: () => void;
+  onCloseClick: () => void;
 }) {
   const width = 400;
   const maxHeight = 650;
@@ -39,14 +40,27 @@ export function pointEventContent({
     .attr("width", width)
     .attr("height", headerHeight);
 
-  const compressButton = eventElement
-    .append(compressIcon)
+  eventElement
+    .append(closeIcon)
     .attr("x", width - 24)
     .attr("y", 6)
     .attr("width", 16)
     .attr("height", 16)
     .on("click", function () {
-      onCompressClick();
+      onCloseClick();
+    })
+    .style("cursor", "pointer")
+    .attr("fill", "#FFF");
+
+  const zoomButton = eventElement
+    .append(zoomIcon)
+    .attr("x", width - 50)
+    .attr("y", 6)
+    .attr("width", 16)
+    .attr("height", 16)
+    .on("click", function () {
+      zoomButton.property("toggleState")();
+      onToggleZoom();
     })
     .style("cursor", "pointer")
     .attr("fill", "#FFF");
@@ -74,8 +88,8 @@ export function pointEventContent({
     .style("cursor", "pointer")
     .style("opacity", 0.4)
     .on("click", function () {
-      compressButton.transition().attr("opacity", 1);
-      onImageClick();
+      zoomButton.property("toggleState")();
+      onToggleZoom();
     });
 
   const image = eventElement
@@ -86,8 +100,8 @@ export function pointEventContent({
     .attr("preserveAspectRatio", "xMidYMid meet")
     .style("cursor", "pointer")
     .on("click", function () {
-      compressButton.transition().attr("opacity", 1);
-      onImageClick();
+      zoomButton.property("toggleState")();
+      onToggleZoom();
     });
 
   return Object.assign(eventElement.node(), {

@@ -47,6 +47,7 @@ export function pointEventContent({
     .attr("width", 16)
     .attr("height", 16)
     .on("click", function () {
+      zoomButton.property("setState")(false);
       onCloseClick();
     })
     .style("cursor", "pointer")

@@ -26,6 +26,10 @@ function zoomIcon() {
       isZoomedIn = !isZoomedIn;
       path.attr("d", isZoomedIn ? zoomOutPath : zoomInPath);
     },
+    setState(state: boolean) {
+        isZoomedIn = state;
+        path.attr("d", isZoomedIn ? zoomOutPath : zoomInPath);
+    }
   });
 }
 

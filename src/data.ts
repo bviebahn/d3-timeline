@@ -831,51 +831,51 @@ const data: TimelineInput<"Ort" | "Produktion" | "Menschen"> = {
       image:
         "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638710851/seit-1990-produktion-hallenblock-ii-01-1920x_zcwj8k.jpg",
     },
-    // {
-    //   
-    //   date: "1814",
-    //   topic: "Menschen",
-    //   title: "Wilhelminenhof",
-    //   text: "Im Jahr 1814 erwirbt Oberfinanzrat Reinbeck das Anwesen und lässt das Lokal schlossartig ausbauen. Er benennt es nach seiner Frau Wilhelmine „Wilhelminenhof“.",
-    //   image:
-    //     "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705328/01-02_gruss-aus-wilhelminenhof-1896-postkarte-htw_fz3hiy.jpg",
-    // },
-    // {
-    //   
-    //   date: "1871",
-    //   topic: "Ort",
-    //   title: "Oberschöneweide",
-    //   text: "Im Jahr der Reichsgründung geht aus dem Wilhelminenhof der Ort Oberschöneweide hervor.",
-    //   image:
-    //     "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705328/01-02_gruss-aus-wilhelminenhof-1896-postkarte-htw_fz3hiy.jpg",
-    // },
-    // {
-    //   
-    //   date: "1889",
-    //   topic: "Ort",
-    //   title: "Verkauf des Wilhelminenhofs",
-    //   text: "Die Ländereien des alten Guts werden verkauft und parzelliert.",
-    //   image:
-    //     "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705328/01-02_gruss-aus-wilhelminenhof-1896-postkarte-htw_fz3hiy.jpg",
-    // },
-    // {
-    //   
-    //   date: "1886",
-    //   topic: "Produktion",
-    //   title: "AEG an der Oberspree",
-    //   text: "Seit 1886 produziert die Allgemeine Electricitäts-Gesellschaft (AEG) in der Berliner Innenstadt Güter für die Elektrizitätswirtschaft. Dank des rasanten Wachstums muss AEG-Gründer Emil Rathenau bald nach neuen Produktionsstandorten suchen. Ein Gelände am Spreelauf in Oberschöneweide, weit vor den Toren der Stadt, erweist sich dank der guten Anbindung an Schienen- und Wasserwege als optimale Wahl.",
-    //   image:
-    //     "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705328/01-01_Kraatz-SBB_IIIC_Kart_N_3857_von_1871_Ausschnitt_hwwt3l.jpg",
-    // },
-    // {
-    //   
-    //   date: "1895",
-    //   topic: "Ort",
-    //   title: "Industriestandort Oberschöneweide",
-    //   text: "1895 beginnt die Bebauung des Geländes zwischen Wilhelminenhofstraße und Spree mit der Errichtung des ersten Drehstromkraftwerks in Deutschland.",
-    //   image:
-    //     "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705326/01-04b_kwo-kohlenplatz-1904_uuqwzm.jpg",
-    // },
+    {
+      
+      date: "1814",
+      topic: "Menschen",
+      title: "Wilhelminenhof",
+      text: "Im Jahr 1814 erwirbt Oberfinanzrat Reinbeck das Anwesen und lässt das Lokal schlossartig ausbauen. Er benennt es nach seiner Frau Wilhelmine „Wilhelminenhof“.",
+      image:
+        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705328/01-02_gruss-aus-wilhelminenhof-1896-postkarte-htw_fz3hiy.jpg",
+    },
+    {
+      
+      date: "1871",
+      topic: "Ort",
+      title: "Oberschöneweide",
+      text: "Im Jahr der Reichsgründung geht aus dem Wilhelminenhof der Ort Oberschöneweide hervor.",
+      image:
+        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705326/01-03_gruss-aus-wilhelminenhof-um-1896-postkarte-htw_tdztsf.jpg",
+    },
+    {
+      
+      date: "1889",
+      topic: "Ort",
+      title: "Verkauf des Wilhelminenhofs",
+      text: "Die Ländereien des alten Guts werden verkauft und parzelliert.",
+      image:
+        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705326/01-03-reserve_gruss-aus-wilhelminenhof-vor-1900-postkarte-htw_jkmbns.jpg",
+    },
+    {
+      
+      date: "1886",
+      topic: "Produktion",
+      title: "AEG an der Oberspree",
+      text: "Seit 1886 produziert die Allgemeine Electricitäts-Gesellschaft (AEG) in der Berliner Innenstadt Güter für die Elektrizitätswirtschaft. Dank des rasanten Wachstums muss AEG-Gründer Emil Rathenau bald nach neuen Produktionsstandorten suchen. Ein Gelände am Spreelauf in Oberschöneweide, weit vor den Toren der Stadt, erweist sich dank der guten Anbindung an Schienen- und Wasserwege als optimale Wahl.",
+      image:
+        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1646579069/1897-1933-ort-kwo-kohlenplatz-1904-01-3840x_bvww2n.jpg",
+    },
+    {
+      
+      date: "1895",
+      topic: "Ort",
+      title: "Industriestandort Oberschöneweide",
+      text: "1895 beginnt die Bebauung des Geländes zwischen Wilhelminenhofstraße und Spree mit der Errichtung des ersten Drehstromkraftwerks in Deutschland.",
+      image:
+        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705326/01-04b_kwo-kohlenplatz-1904_uuqwzm.jpg",
+    },
     {
       
       date: "1897",
@@ -892,7 +892,7 @@ const data: TimelineInput<"Ort" | "Produktion" | "Menschen"> = {
       title: "Gebäude der Nationalen Automobil-Gesellschaft",
       text: "1905 entsteht das Gebäude der Nationalen Automobil-Gesellschaft* (NAG). Die Fabriken, ausgestattet mit elektrischer Antriebs- und Beleuchtungstechnik, gehören zu den modernsten Industrieanlagen jener Zeit. Ihre Fassaden aus gelbem Ziegelstein, dem sogenannten „Schöneweider Klinker“, prägen das Erscheinungsbild des gesamten Quartiers.",
       image:
-        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705326/01-04b_kwo-kohlenplatz-1904_uuqwzm.jpg",
+        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1646579262/1897-1933-produktion-nag-protos-grau-01-3840x_pbnfk0.jpg",
     },
     {
       
@@ -900,15 +900,6 @@ const data: TimelineInput<"Ort" | "Produktion" | "Menschen"> = {
       topic: "Ort",
       title: "Kleinstadt Oberschöneweide",
       text: "Mit der Produktivität wächst auch die Bevölkerungszahl: Dank des Zuzugs von Arbeitskräften und deren Familien entwickelt sich Oberschöneweide rasch zu einer Kleinstadt, die im Jahr 1919 rund 25.000 Einwohnerinnen und Einwohner zählt.",
-      image:
-        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705327/01-04c_kwo-trommellager-vor-halle-1-1912_bdfljk.jpg",
-    },
-    {
-      
-      date: "1920",
-      topic: "Ort",
-      title: "Anschluss an Berlin",
-      text: "Oberschöneweide wird zu einem Ortsteil von Groß-Berlin.",
       image:
         "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705327/01-04c_kwo-trommellager-vor-halle-1-1912_bdfljk.jpg",
     },
@@ -973,7 +964,7 @@ const data: TimelineInput<"Ort" | "Produktion" | "Menschen"> = {
       title: "Alles für den „Endsieg“",
       text: "Direkt nach Kriegsbeginn werden 700 KWO-Mitarbeiter zur Wehrmacht eingezogen. Um die Produktion aufrechtzuerhalten, arbeiten in den Fabriken nun vor allem Frauen. Im weiteren Verlauf des Krieges werden zudem Kriegsgefangene sowie Deportierte aus den besetzten Gebieten in ganz Europa zur Zwangsarbeit verpflichtet. Ihrem Schicksal widmet sich eine Ausstellung im nahegelegenen Dokumentationszentrum NS-Zwangsarbeit in Schöneweide. Es befindet sich auf dem Gelände des einzigen noch weitgehend erhaltenen ehemaligen NS-Zwangsarbeiterlagers, das während des Zweiten Weltkriegs zu den mehr als 3.000 über das Stadtgebiet verteilten Sammelunterkünften für Zwangsarbeiter gehörte. Seit 2006 informiert dort die Stiftung Topographie des Terrors an historischem Ort über das System Zwangsarbeit.",
       image:
-        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705327/01-08_sortieren-von-pressteilen-1913_zeszux.jpg",
+        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1646579819/19331945-menschen-arbeitskarte-01-3840x_mcnkha.jpg",
     },
     {
       
@@ -993,24 +984,6 @@ const data: TimelineInput<"Ort" | "Produktion" | "Menschen"> = {
       image:
         "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705333/02-02b_gebaeude-A4-nach-januar-1944-02_pbgpfp.jpg",
     },
-    // {
-    //   
-    //   start: "1946",
-    //   end: "1954",
-    //   title: "SAG-VEB-Kombinat",
-    //   text: "1946 werden von der Sowjetischen Militäradministration sogenannte Sowjetische Aktiengesellschaften (SAG) gegründet. Diese unter Kontrolle der UdSSR stehenden Unternehmen dienen dem Reparationsausgleich für erlittene Kriegsschäden. 1954 enden die Reparationszahlungen. Die Unternehmen werden verstaatlicht und in Volkseigene Betriebe (VEB) verwandelt. Damit überführt die 1949 gegründete DDR die Produktionsmittel aus privater Hand in den Besitz des Volkes. Über den Zusammenschluss von Volkseigenen Betrieben mit ähnlichem Produktionsprofil entstehen Kombinate. Dadurch soll der Wettbewerb egalisiert und das Potenzial für Forschung und Entwicklung genutzt werden.",
-    //   image:
-    //     "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705333/02-02b_gebaeude-A4-nach-januar-1944-02_pbgpfp.jpg",
-    // },
-    // {
-    //   
-    //   start: "1958",
-    //   end: "1961",
-    //   title: "VEB KWO",
-    //   text: "Auch wenn von Spreehalle und Hallenblock II nur noch die Umfassungsmauern stehen, können die übrigen, weitgehend erhaltenen Werkshallen rasch wieder genutzt werden. 1958 bis 1961 wird die neue Spreehalle West* im Stil der sachlich-funktionalen Industriemoderne errichtet.",
-    //   image:
-    //     "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705333/02-02b_gebaeude-A4-nach-januar-1944-02_pbgpfp.jpg",
-    // },
     {
       
       date: "1958",
@@ -1018,7 +991,7 @@ const data: TimelineInput<"Ort" | "Produktion" | "Menschen"> = {
       title: "Starkstromkabel und Wäscheleine",
       text: "Die Nachkriegsproduktion im KWO konzentriert sich zunächst auf Güter für den täglichen Bedarf der notleidenden Bevölkerung: Löffel, Töpfe, Bratpfannen, Nägel und Feuerzeuge. Gleichzeitig gilt es, das stark zerstörte Kabelnetz Berlins wiederherzustellen. Schon 1958 kommen 85 Prozent aller in der DDR hergestellten Starkstromkabel aus dem KWO. Aber auch Gebrauchsgüter für den Massenbedarf, darunter Hula-Hoop-Reifen, Wäscheleinen und Gartenschläuche, werden in Oberschöneweide produziert.",
       image:
-        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1639065195/19451990-produktion-arbeiterinnen-ringkerne-01-1920x_znt4cl.jpg",
+        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1646580105/19451990-produktion-stromfix-und-schleifaufsatz-01-3840x_wvembm.jpg",
     },
     {
       
@@ -1049,12 +1022,12 @@ const data: TimelineInput<"Ort" | "Produktion" | "Menschen"> = {
     },
     {
       
-      date: "1998",
+      date: "2022",
       topic: "Menschen",
       title: "Wende und Wandel",
       text: "Es gibt nur wenige Orte, die den Übergang vom Industriezeitalter zur Wissensgesellschaft besser verkörpern als Schöneweide. Doch dieser Wandel vollzog sich anfangs nicht ohne Verluste. Mit der Schließung der Fabriken hatten viele Menschen ihre Arbeit verloren und den Stadtteil verlassen. Leerstand und Verfall prägten das Viertel. Doch seit 1998 steigt die Einwohnerzahl wieder. In den renovierten Straßen mit ihren Läden und Cafés herrscht neues Leben. Wo früher die Maschinen und Fließbänder rotierten, wird heute gelernt und geforscht. Die HTW Berlin ist ein Teil dieser Erfolgsgeschichte.",
       image:
-        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1639065491/seit-1990-ort-tor-4-01-1920x_l2apwg.jpg",
+        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1646580189/seit-1990-ort-campus-wilhelminenhof-01-3840x_ow0oqf.jpg",
     },
   ],
 };

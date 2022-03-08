@@ -833,15 +833,6 @@ const data: TimelineInput<"Ort" | "Produktion" | "Menschen"> = {
     },
     {
       
-      date: "1814",
-      topic: "Menschen",
-      title: "Wilhelminenhof",
-      text: "Im Jahr 1814 erwirbt Oberfinanzrat Reinbeck das Anwesen und lässt das Lokal schlossartig ausbauen. Er benennt es nach seiner Frau Wilhelmine „Wilhelminenhof“.",
-      image:
-        "https://res.cloudinary.com/dvdtcs8mf/image/upload/v1638705328/01-02_gruss-aus-wilhelminenhof-1896-postkarte-htw_fz3hiy.jpg",
-    },
-    {
-      
       date: "1871",
       topic: "Ort",
       title: "Oberschöneweide",

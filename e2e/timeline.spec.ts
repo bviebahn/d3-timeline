@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 test.describe("Point events", () => {
   test("should display point events", async ({ page }) => {
     await page.waitForSelector(".pointEvent");
-    expect(await page.locator(".pointEvent").count()).toEqual(18);
+    expect(await page.locator(".pointEvent").count()).toEqual(21);
   });
 });
 
@@ -51,28 +51,28 @@ test.describe("Span events", () => {
   test("should be able to update domain by dragging", async ({ page }) => {
     await page.waitForSelector(".axis");
 
-    await page.waitForSelector(".tick >> text=1900");
+    await page.waitForSelector(".tick >> text=1880");
     await page.waitForSelector(".tick >> text=2040", { state: "hidden" });
 
     await page.locator(".axis").dragTo(page.locator(".axis"), {
-      sourcePosition: { x: 400, y: 50 },
-      targetPosition: { x: 200, y: 50 },
+      sourcePosition: { x: 500, y: 50 },
+      targetPosition: { x: 300, y: 50 },
     });
 
-    await page.waitForSelector(".tick >> text=1900", { state: "hidden" });
+    await page.waitForSelector(".tick >> text=1880", { state: "hidden" });
     await page.waitForSelector(".tick >> text=2040");
   });
 
   test("should be able to update domain by scrolling", async ({ page }) => {
     await page.waitForSelector(".axis");
 
-    await page.waitForSelector(".tick >> text=1900");
+    await page.waitForSelector(".tick >> text=1880");
     await page.waitForSelector(".tick >> text=2020");
     await page.mouse.move(500, 100);
     await page.mouse.wheel(0, -1000)
     
     await page.waitForSelector(".tick >> text=1950");
-    await page.waitForSelector(".tick >> text=1900", { state: "hidden" });
+    await page.waitForSelector(".tick >> text=1880", { state: "hidden" });
     await page.waitForSelector(".tick >> text=2020", { state: "hidden" });
   });
 });
